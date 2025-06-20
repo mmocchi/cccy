@@ -9,7 +9,7 @@ description = "Python complexity measurement tool"
 readme = "README.md"
 license = "MIT"
 authors = [
-    { name = "pycomplex", email = "pycomplex@example.com" },
+    { name = "mmocchi", email = "akihiro.matsumoto.exe@gmail.com" },
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -29,14 +29,7 @@ dependencies = [
     "cognitive-complexity>=1.3.0",
     "click>=8.0.0",
     "tabulate>=0.9.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "mypy>=1.0.0",
-    "pre-commit>=3.0.0",
+    "tomli>=1.2.0;python_version<'3.11'",
 ]
 
 [project.scripts]
@@ -139,9 +132,35 @@ exclude_lines = [
     "@(abc\\.)?abstractmethod",
 ]
 
+[tool.pycomplex]
+# Maximum complexity thresholds
+max-complexity = 10
+max-cognitive = 7
+
+# File patterns to exclude (default: empty)
+exclude = [
+    "*/migrations/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/node_modules/*",
+    "*/__pycache__/*",
+    "*.egg-info/*",
+]
+
+# File patterns to include (default: all .py files)
+# If specified, only files matching these patterns will be analyzed
+include = []
+
+# Default paths to analyze when no paths are provided
+# If not specified, current directory is used
+paths = ["src/"]
+
 [dependency-groups]
 dev = [
     "mypy>=1.14.1",
+    "pytest>=8.3.5",
+    "pytest-cov>=5.0.0",
     "ruff>=0.12.0",
     "types-tabulate>=0.9.0.20241207",
+    "pre-commit>=3.5.0",
 ]

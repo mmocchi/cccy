@@ -84,6 +84,7 @@ class ComplexityAnalyzer:
         directory: Union[str, Path],
         recursive: bool = True,
         exclude_patterns: Optional[List[str]] = None,
+        include_patterns: Optional[List[str]] = None,
     ) -> List[FileComplexityResult]:
         """Analyze all Python files in a directory.
 
@@ -91,12 +92,14 @@ class ComplexityAnalyzer:
             directory: Directory to analyze
             recursive: Whether to analyze subdirectories
             exclude_patterns: List of glob patterns to exclude
+            include_patterns: List of glob patterns to include (if specified, only these will be analyzed)
 
         Returns:
             List of FileComplexityResult objects
         """
         directory = Path(directory)
         exclude_patterns = exclude_patterns or []
+        include_patterns = include_patterns or []
 
         if not directory.exists() or not directory.is_dir():
             return []
@@ -108,6 +111,11 @@ class ComplexityAnalyzer:
             # Skip excluded files
             if any(file_path.match(pattern) for pattern in exclude_patterns):
                 continue
+            
+            # If include patterns are specified, only include matching files
+            if include_patterns:
+                if not any(file_path.match(pattern) for pattern in include_patterns):
+                    continue
 
             result = self.analyze_file(file_path)
             if result:

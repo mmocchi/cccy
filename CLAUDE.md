@@ -30,6 +30,40 @@ This project uses **go-task** as the task runner with **uv** for Python package 
 - `uv run pycomplex show-list src/` - Show complexity for all files
 - `uv run pycomplex check --max-complexity 10 src/` - CI-friendly complexity check
 - `uv run pycomplex show-summary src/` - Show summary statistics only
+- `uv run pycomplex check` - Uses configuration from pyproject.toml
+- `uv run pycomplex show-list` - Uses configuration from pyproject.toml
+- `uv run pycomplex show-summary` - Uses configuration from pyproject.toml
+
+## Configuration
+
+pycomplex can be configured in `pyproject.toml` under the `[tool.pycomplex]` section:
+
+```toml
+[tool.pycomplex]
+# Maximum complexity thresholds
+max-complexity = 10
+max-cognitive = 7
+
+# File patterns to exclude (default: empty)
+exclude = [
+    "*/migrations/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/node_modules/*",
+    "*/__pycache__/*",
+    "*.egg-info/*",
+]
+
+# File patterns to include (default: all .py files)
+# If specified, only files matching these patterns will be analyzed
+include = []
+
+# Default paths to analyze when no paths are provided
+# If not specified, current directory is used
+paths = ["src/"]
+```
+
+**Configuration Priority**: CLI options override configuration file settings.
 
 ## Architecture Overview
 

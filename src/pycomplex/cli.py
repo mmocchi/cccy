@@ -7,6 +7,7 @@ from typing import Optional
 import click
 
 from .analyzer import ComplexityAnalyzer
+from .config import PyComplexConfig
 from .formatters import OutputFormatter
 
 
@@ -28,11 +29,10 @@ def main(ctx: click.Context) -> None:
 
 
 @main.command()
-@click.argument("paths", nargs=-1, type=click.Path(exists=True), required=True)
+@click.argument("paths", nargs=-1, type=click.Path(exists=True), required=False)
 @click.option(
     "--max-complexity",
     type=int,
-    required=True,
     help="Maximum allowed cyclomatic complexity",
 )
 @click.option(
@@ -48,13 +48,17 @@ def main(ctx: click.Context) -> None:
 @click.option(
     "--exclude", multiple=True, help="Exclude files matching these glob patterns"
 )
+@click.option(
+    "--include", multiple=True, help="Include only files matching these glob patterns"
+)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 def check(
     paths: tuple,
-    max_complexity: int,
+    max_complexity: Optional[int],
     max_cognitive: Optional[int],
     recursive: bool,
     exclude: tuple,
+    include: tuple,
     verbose: bool,
 ) -> None:
     """Check if complexity exceeds thresholds.
@@ -65,10 +69,32 @@ def check(
     Examples:
         pycomplex check --max-complexity 10 src/
         pycomplex check --max-complexity 10 --max-cognitive 7 src/
+        pycomplex check  # Uses configuration from pyproject.toml
     """
-    analyzer = ComplexityAnalyzer(max_complexity=max_complexity)
+    # Load configuration and merge with CLI options
+    config = PyComplexConfig()
+    merged_config = config.merge_with_cli_options(
+        max_complexity=max_complexity,
+        max_cognitive=max_cognitive,
+        exclude=list(exclude) if exclude else None,
+        include=list(include) if include else None,
+        paths=list(paths) if paths else None,
+    )
+    
+    # Validate required configuration
+    if merged_config["max_complexity"] is None:
+        click.echo("Error: --max-complexity is required or must be set in pyproject.toml [tool.pycomplex] section", err=True)
+        sys.exit(1)
+    
+    final_max_complexity = merged_config["max_complexity"]
+    final_max_cognitive = merged_config["max_cognitive"]
+    final_exclude = merged_config["exclude"]
+    final_include = merged_config["include"]
+    final_paths = merged_config["paths"]
 
-    all_results = _analyze_paths(paths, analyzer, recursive, exclude, verbose)
+    analyzer = ComplexityAnalyzer(max_complexity=final_max_complexity)
+
+    all_results = _analyze_paths(tuple(final_paths), analyzer, recursive, final_exclude, final_include, verbose)
 
     if not all_results:
         click.echo("No Python files found to analyze.")
@@ -77,8 +103,8 @@ def check(
     # Filter files that exceed thresholds
     failed_results = []
     for result in all_results:
-        exceeds_cyclomatic = result.max_cyclomatic > max_complexity
-        exceeds_cognitive = max_cognitive and result.max_cognitive > max_cognitive
+        exceeds_cyclomatic = result.max_cyclomatic > final_max_complexity
+        exceeds_cognitive = final_max_cognitive and result.max_cognitive > final_max_cognitive
 
         if exceeds_cyclomatic or exceeds_cognitive:
             failed_results.append(result)
@@ -90,22 +116,22 @@ def check(
         for result in failed_results:
             click.echo(f"\n📁 {result.file_path}")
             click.echo(
-                f"   Max Cyclomatic: {result.max_cyclomatic} (limit: {max_complexity})"
+                f"   Max Cyclomatic: {result.max_cyclomatic} (limit: {final_max_complexity})"
             )
-            if max_cognitive:
+            if final_max_cognitive:
                 click.echo(
-                    f"   Max Cognitive: {result.max_cognitive} (limit: {max_cognitive})"
+                    f"   Max Cognitive: {result.max_cognitive} (limit: {final_max_cognitive})"
                 )
             click.echo(f"   Status: {result.status}")
 
             # Show functions that exceed limits
             problem_functions = []
             for func in result.functions:
-                if func.cyclomatic_complexity > max_complexity:
+                if func.cyclomatic_complexity > final_max_complexity:
                     problem_functions.append(
                         f"   - {func.name}() line {func.lineno}: cyclomatic={func.cyclomatic_complexity}"
                     )
-                elif max_cognitive and func.cognitive_complexity > max_cognitive:
+                elif final_max_cognitive and func.cognitive_complexity > final_max_cognitive:
                     problem_functions.append(
                         f"   - {func.name}() line {func.lineno}: cognitive={func.cognitive_complexity}"
                     )
@@ -124,7 +150,7 @@ def check(
 
 
 @main.command()
-@click.argument("paths", nargs=-1, type=click.Path(exists=True), required=True)
+@click.argument("paths", nargs=-1, type=click.Path(exists=True), required=False)
 @click.option(
     "--format",
     "output_format",
@@ -140,12 +166,16 @@ def check(
 @click.option(
     "--exclude", multiple=True, help="Exclude files matching these glob patterns"
 )
+@click.option(
+    "--include", multiple=True, help="Include only files matching these glob patterns"
+)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 def show_list(
     paths: tuple,
     output_format: str,
     recursive: bool,
     exclude: tuple,
+    include: tuple,
     verbose: bool,
 ) -> None:
     """Show list of files with their complexity metrics.
@@ -156,11 +186,24 @@ def show_list(
         pycomplex show-list src/
         pycomplex show-list --format json src/
         pycomplex show-list --format detailed file.py
+        pycomplex show-list  # Uses configuration from pyproject.toml
     """
+    # Load configuration and merge with CLI options
+    config = PyComplexConfig()
+    merged_config = config.merge_with_cli_options(
+        exclude=list(exclude) if exclude else None,
+        include=list(include) if include else None,
+        paths=list(paths) if paths else None,
+    )
+    
+    final_exclude = merged_config["exclude"]
+    final_include = merged_config["include"]
+    final_paths = merged_config["paths"]
+
     analyzer = ComplexityAnalyzer()
     formatter = OutputFormatter()
 
-    all_results = _analyze_paths(paths, analyzer, recursive, exclude, verbose)
+    all_results = _analyze_paths(tuple(final_paths), analyzer, recursive, final_exclude, final_include, verbose)
 
     if not all_results:
         click.echo("No Python files found to analyze.")
@@ -186,7 +229,7 @@ def show_list(
 
 
 @main.command()
-@click.argument("paths", nargs=-1, type=click.Path(exists=True), required=True)
+@click.argument("paths", nargs=-1, type=click.Path(exists=True), required=False)
 @click.option(
     "--recursive/--no-recursive",
     default=True,
@@ -195,11 +238,15 @@ def show_list(
 @click.option(
     "--exclude", multiple=True, help="Exclude files matching these glob patterns"
 )
+@click.option(
+    "--include", multiple=True, help="Include only files matching these glob patterns"
+)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 def show_summary(
     paths: tuple,
     recursive: bool,
     exclude: tuple,
+    include: tuple,
     verbose: bool,
 ) -> None:
     """Show summary statistics only.
@@ -209,11 +256,24 @@ def show_summary(
     Examples:
         pycomplex show-summary src/
         pycomplex show-summary src/ tests/
+        pycomplex show-summary  # Uses configuration from pyproject.toml
     """
+    # Load configuration and merge with CLI options
+    config = PyComplexConfig()
+    merged_config = config.merge_with_cli_options(
+        exclude=list(exclude) if exclude else None,
+        include=list(include) if include else None,
+        paths=list(paths) if paths else None,
+    )
+    
+    final_exclude = merged_config["exclude"]
+    final_include = merged_config["include"]
+    final_paths = merged_config["paths"]
+
     analyzer = ComplexityAnalyzer()
     formatter = OutputFormatter()
 
-    all_results = _analyze_paths(paths, analyzer, recursive, exclude, verbose)
+    all_results = _analyze_paths(tuple(final_paths), analyzer, recursive, final_exclude, final_include, verbose)
 
     if not all_results:
         click.echo("No Python files found to analyze.")
@@ -228,7 +288,8 @@ def _analyze_paths(
     paths: tuple,
     analyzer: ComplexityAnalyzer,
     recursive: bool,
-    exclude: tuple,
+    exclude: list,
+    include: list,
     verbose: bool,
 ) -> list:
     """Helper function to analyze given paths."""
@@ -251,7 +312,7 @@ def _analyze_paths(
 
         elif path.is_dir():
             results = analyzer.analyze_directory(
-                path, recursive=recursive, exclude_patterns=list(exclude)
+                path, recursive=recursive, exclude_patterns=exclude, include_patterns=include
             )
             all_results.extend(results)
 

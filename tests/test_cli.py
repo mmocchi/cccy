@@ -16,21 +16,29 @@ class TestCLI:
         runner = CliRunner()
         result = runner.invoke(main, ["--help"])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 0, (
+            f"CLI help command failed with exit code {result.exit_code}"
+        )
         assert (
             "Analyze Python code for Cyclomatic and Cognitive complexity"
             in result.output
+        ), "Main description not found in help output"
+        assert "check" in result.output, "'check' command not found in help output"
+        assert "show-list" in result.output, (
+            "'show-list' command not found in help output"
         )
-        assert "check" in result.output
-        assert "show-list" in result.output
-        assert "show-summary" in result.output
+        assert "show-summary" in result.output, (
+            "'show-summary' command not found in help output"
+        )
 
     def test_cli_version(self):
         """Test CLI version output."""
         runner = CliRunner()
         result = runner.invoke(main, ["--version"])
 
-        assert result.exit_code == 0
+        assert result.exit_code == 0, (
+            f"CLI version command failed with exit code {result.exit_code}"
+        )
 
     def test_cli_analyze_file(self):
         """Test analyzing a single file."""
@@ -39,11 +47,19 @@ class TestCLI:
 
         result = runner.invoke(main, ["show-list", str(fixture_path)])
 
-        assert result.exit_code == 0
-        assert "simple.py" in result.output
-        assert "Cyclomatic" in result.output
-        assert "Cognitive" in result.output
-        assert "Status" in result.output
+        assert result.exit_code == 0, (
+            f"show-list command failed with exit code {result.exit_code}"
+        )
+        assert "simple.py" in result.output, (
+            "Expected filename 'simple.py' not found in output"
+        )
+        assert "Cyclomatic" in result.output, (
+            "'Cyclomatic' header not found in table output"
+        )
+        assert "Cognitive" in result.output, (
+            "'Cognitive' header not found in table output"
+        )
+        assert "Status" in result.output, "'Status' header not found in table output"
 
     def test_cli_analyze_directory(self):
         """Test analyzing a directory."""
@@ -64,13 +80,15 @@ class TestCLI:
             main, ["show-list", "--format", "json", str(fixture_path)]
         )
 
-        assert result.exit_code == 0
+        assert result.exit_code == 0, (
+            f"JSON format command failed with exit code {result.exit_code}"
+        )
         # Should be valid JSON
         import json
 
         data = json.loads(result.output)
-        assert isinstance(data, list)
-        assert len(data) >= 1
+        assert isinstance(data, list), f"Expected JSON array, got {type(data)}"
+        assert len(data) >= 1, f"Expected at least 1 file result, got {len(data)}"
 
     def test_cli_csv_format(self):
         """Test CSV output format."""
@@ -246,3 +264,131 @@ class TestCLI:
 
         assert result.exit_code != 0
         assert "Invalid value" in result.output or "Choose from" in result.output
+
+    def test_cli_show_functions_help(self):
+        """Test show-functions help output."""
+        runner = CliRunner()
+        result = runner.invoke(main, ["show-functions", "--help"])
+
+        assert result.exit_code == 0, (
+            f"show-functions help command failed with exit code {result.exit_code}"
+        )
+        assert "Show function-level complexity metrics" in result.output, (
+            "Function-level help description not found"
+        )
+        assert "table" in result.output, "'table' format option not found in help"
+        assert "json" in result.output, "'json' format option not found in help"
+        assert "csv" in result.output, "'csv' format option not found in help"
+
+    def test_cli_show_functions_table(self):
+        """Test show-functions with table format."""
+        runner = CliRunner()
+        fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
+
+        result = runner.invoke(main, ["show-functions", str(fixture_path)])
+
+        assert result.exit_code == 0
+        assert "simple.py" in result.output
+        assert "Function" in result.output
+        assert "Line" in result.output
+        assert "Cyclomatic" in result.output
+        assert "Cognitive" in result.output
+        assert "File totals" in result.output
+
+    def test_cli_show_functions_json(self):
+        """Test show-functions with JSON format."""
+        runner = CliRunner()
+        fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
+
+        result = runner.invoke(
+            main, ["show-functions", "--format", "json", str(fixture_path)]
+        )
+
+        assert result.exit_code == 0, (
+            f"show-functions JSON command failed with exit code {result.exit_code}"
+        )
+        # Should be valid JSON
+        import json
+
+        data = json.loads(result.output)
+        assert isinstance(data, list), (
+            f"Expected JSON array for functions, got {type(data)}"
+        )
+        # Each item should be a function
+        if data:  # If there are functions in the file
+            function_item = data[0]
+            assert "file_path" in function_item, (
+                "Missing 'file_path' in function JSON output"
+            )
+            assert "function_name" in function_item, (
+                "Missing 'function_name' in function JSON output"
+            )
+            assert "line_number" in function_item, (
+                "Missing 'line_number' in function JSON output"
+            )
+            assert "cyclomatic_complexity" in function_item, (
+                "Missing 'cyclomatic_complexity' in function JSON output"
+            )
+            assert "cognitive_complexity" in function_item, (
+                "Missing 'cognitive_complexity' in function JSON output"
+            )
+
+    def test_cli_show_functions_csv(self):
+        """Test show-functions with CSV format."""
+        runner = CliRunner()
+        fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
+
+        result = runner.invoke(
+            main, ["show-functions", "--format", "csv", str(fixture_path)]
+        )
+
+        assert result.exit_code == 0
+        lines = result.output.strip().split("\n")
+        # Should have header
+        assert len(lines) >= 1
+        header = lines[0]
+        assert "file_path" in header
+        assert "function_name" in header
+        assert "line_number" in header
+        assert "cyclomatic_complexity" in header
+        assert "cognitive_complexity" in header
+
+    def test_cli_show_functions_directory(self):
+        """Test show-functions with directory."""
+        runner = CliRunner()
+        fixtures_dir = Path(__file__).parent / "fixtures"
+
+        result = runner.invoke(main, ["show-functions", str(fixtures_dir)])
+
+        assert result.exit_code == 0
+        assert "simple.py" in result.output
+
+    def test_cli_show_functions_with_options(self):
+        """Test show-functions with various options."""
+        runner = CliRunner()
+        fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
+
+        result = runner.invoke(
+            main, ["show-functions", "--verbose", "--recursive", str(fixture_path)]
+        )
+
+        assert result.exit_code == 0
+
+    def test_cli_show_functions_empty_directory(self):
+        """Test show-functions with empty directory."""
+        runner = CliRunner()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = runner.invoke(main, ["show-functions", tmpdir])
+
+            assert result.exit_code == 1
+            assert "No Python files found" in result.output
+
+    def test_cli_main_without_subcommand(self):
+        """Test main command without subcommand shows help."""
+        runner = CliRunner()
+        result = runner.invoke(main, [])
+
+        assert result.exit_code == 0
+        assert "Python Code Complexity Analyzer" in result.output
+        assert "COMMANDS:" in result.output

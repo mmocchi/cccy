@@ -79,39 +79,85 @@ def display_failed_results(
         max_cognitive: Maximum cognitive complexity threshold (optional)
 
     """
+    _display_failure_header()
+
+    for result in failed_results:
+        _display_single_failed_result(result, max_complexity, max_cognitive)
+
+    _display_failure_summary(len(failed_results), total_results_count)
+
+
+def _display_failure_header() -> None:
+    """Display the header for failed complexity checks."""
     click.echo("❌ Complexity check failed!")
     click.echo("\nFiles exceeding complexity thresholds:")
 
-    for result in failed_results:
-        click.echo(f"\n📁 {result.file_path}")
-        click.echo(
-            f"   Max Cyclomatic: {result.max_cyclomatic} (limit: {max_complexity})"
-        )
-        if max_cognitive:
-            click.echo(
-                f"   Max Cognitive: {result.max_cognitive} (limit: {max_cognitive})"
+
+def _display_single_failed_result(
+    result: Any, max_complexity: int, max_cognitive: Optional[int]
+) -> None:
+    """Display details for a single failed result.
+
+    Args:
+        result: File complexity result that failed
+        max_complexity: Maximum cyclomatic complexity threshold
+        max_cognitive: Maximum cognitive complexity threshold (optional)
+
+    """
+    click.echo(f"\n📁 {result.file_path}")
+    click.echo(f"   Max Cyclomatic: {result.max_cyclomatic} (limit: {max_complexity})")
+    if max_cognitive:
+        click.echo(f"   Max Cognitive: {result.max_cognitive} (limit: {max_cognitive})")
+    click.echo(f"   Status: {result.status}")
+
+    problem_functions = _get_problem_functions(
+        result.functions, max_complexity, max_cognitive
+    )
+    if problem_functions:
+        click.echo("   Problem functions:")
+        for func_info in problem_functions:
+            click.echo(func_info)
+
+
+def _get_problem_functions(
+    functions: Any, max_complexity: int, max_cognitive: Optional[int]
+) -> List[str]:
+    """Get list of functions that exceed complexity thresholds.
+
+    Args:
+        functions: List of function complexity results
+        max_complexity: Maximum cyclomatic complexity threshold
+        max_cognitive: Maximum cognitive complexity threshold (optional)
+
+    Returns:
+        List of formatted problem function descriptions
+
+    """
+    problem_functions = []
+
+    for func in functions:
+        if func.cyclomatic_complexity > max_complexity:
+            problem_functions.append(
+                f"   - {func.name}() line {func.lineno}: cyclomatic={func.cyclomatic_complexity}"
             )
-        click.echo(f"   Status: {result.status}")
+        elif max_cognitive and func.cognitive_complexity > max_cognitive:
+            problem_functions.append(
+                f"   - {func.name}() line {func.lineno}: cognitive={func.cognitive_complexity}"
+            )
 
-        # Show functions that exceed limits
-        problem_functions = []
-        for func in result.functions:
-            if func.cyclomatic_complexity > max_complexity:
-                problem_functions.append(
-                    f"   - {func.name}() line {func.lineno}: cyclomatic={func.cyclomatic_complexity}"
-                )
-            elif max_cognitive and func.cognitive_complexity > max_cognitive:
-                problem_functions.append(
-                    f"   - {func.name}() line {func.lineno}: cognitive={func.cognitive_complexity}"
-                )
+    return problem_functions
 
-        if problem_functions:
-            click.echo("   Problem functions:")
-            for func_info in problem_functions:
-                click.echo(func_info)
 
+def _display_failure_summary(failed_count: int, total_count: int) -> None:
+    """Display summary of failed complexity checks.
+
+    Args:
+        failed_count: Number of files that failed
+        total_count: Total number of files analyzed
+
+    """
     click.echo(
-        f"\n❌ {len(failed_results)} out of {total_results_count} files failed complexity check"
+        f"\n❌ {failed_count} out of {total_count} files failed complexity check"
     )
 
 

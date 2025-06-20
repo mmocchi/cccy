@@ -149,7 +149,9 @@ class ComplexityCalculatorFactory:
         return list(cls._calculators.keys())
 
     @classmethod
-    def register_calculator(cls, name: str, calculator_class: Type[ComplexityCalculator]) -> None:
+    def register_calculator(
+        cls, name: str, calculator_class: Type[ComplexityCalculator]
+    ) -> None:
         """Register a new complexity calculator type.
 
         Args:

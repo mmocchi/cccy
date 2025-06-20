@@ -54,37 +54,112 @@ class AnalyzerService:
 
         for path_str in paths:
             path = Path(path_str)
-
-            if verbose:
-                click.echo(f"Analyzing: {path}", err=True)
-
-            try:
-                if path.is_file():
-                    result = self._analyze_single_file(path, verbose)
-                    if result:
-                        all_results.append(result)
-
-                elif path.is_dir():
-                    results = self._analyze_directory(
-                        path, recursive, exclude_patterns, include_patterns, verbose
-                    )
-                    all_results.extend(results)
-
-                else:
-                    raise FileNotFoundError(f"Path {path} is not a file or directory")
-
-            except PermissionError as e:
-                logger.error(f"Permission denied accessing {path}: {e}")
-                if verbose:
-                    click.echo(f"Error: Permission denied accessing {path}", err=True)
-                continue
-            except Exception as e:
-                logger.error(f"Error analyzing {path}: {e}")
-                if verbose:
-                    click.echo(f"Error analyzing {path}: {e}", err=True)
-                continue
+            results = self._analyze_single_path(
+                path, recursive, exclude_patterns, include_patterns, verbose
+            )
+            all_results.extend(results)
 
         return all_results
+
+    def _analyze_single_path(
+        self,
+        path: Path,
+        recursive: bool,
+        exclude_patterns: List[str],
+        include_patterns: List[str],
+        verbose: bool,
+    ) -> List[FileComplexityResult]:
+        """Analyze a single path (file or directory).
+
+        Args:
+            path: Path to analyze
+            recursive: Whether to analyze directories recursively
+            exclude_patterns: List of glob patterns to exclude
+            include_patterns: List of glob patterns to include
+            verbose: Enable verbose output
+
+        Returns:
+            List of FileComplexityResult objects
+
+        """
+        if verbose:
+            click.echo(f"Analyzing: {path}", err=True)
+
+        try:
+            return self._process_path(
+                path, recursive, exclude_patterns, include_patterns, verbose
+            )
+        except PermissionError as e:
+            self._handle_permission_error(path, e, verbose)
+            return []
+        except Exception as e:
+            self._handle_general_error(path, e, verbose)
+            return []
+
+    def _process_path(
+        self,
+        path: Path,
+        recursive: bool,
+        exclude_patterns: List[str],
+        include_patterns: List[str],
+        verbose: bool,
+    ) -> List[FileComplexityResult]:
+        """Process a path based on its type.
+
+        Args:
+            path: Path to process
+            recursive: Whether to analyze directories recursively
+            exclude_patterns: List of glob patterns to exclude
+            include_patterns: List of glob patterns to include
+            verbose: Enable verbose output
+
+        Returns:
+            List of FileComplexityResult objects
+
+        Raises:
+            FileNotFoundError: If path is neither file nor directory
+
+        """
+        if path.is_file():
+            result = self._analyze_single_file(path, verbose)
+            return [result] if result else []
+
+        if path.is_dir():
+            return self._analyze_directory(
+                path, recursive, exclude_patterns, include_patterns, verbose
+            )
+
+        raise FileNotFoundError(f"Path {path} is not a file or directory")
+
+    def _handle_permission_error(
+        self, path: Path, error: PermissionError, verbose: bool
+    ) -> None:
+        """Handle permission denied errors.
+
+        Args:
+            path: Path that caused the error
+            error: The permission error
+            verbose: Whether to show verbose output
+
+        """
+        logger.error(f"Permission denied accessing {path}: {error}")
+        if verbose:
+            click.echo(f"Error: Permission denied accessing {path}", err=True)
+
+    def _handle_general_error(
+        self, path: Path, error: Exception, verbose: bool
+    ) -> None:
+        """Handle general analysis errors.
+
+        Args:
+            path: Path that caused the error
+            error: The general error
+            verbose: Whether to show verbose output
+
+        """
+        logger.error(f"Error analyzing {path}: {error}")
+        if verbose:
+            click.echo(f"Error analyzing {path}: {error}", err=True)
 
     def _analyze_single_file(
         self, file_path: Path, verbose: bool = False

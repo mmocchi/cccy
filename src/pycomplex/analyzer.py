@@ -145,22 +145,78 @@ class ComplexityAnalyzer:
         if not directory.exists() or not directory.is_dir():
             return []
 
-        results = []
+        files_to_analyze = self._get_python_files(
+            directory, recursive, exclude_patterns, include_patterns
+        )
+        return self._analyze_files(files_to_analyze)
+
+    def _get_python_files(
+        self,
+        directory: Path,
+        recursive: bool,
+        exclude_patterns: List[str],
+        include_patterns: List[str],
+    ) -> List[Path]:
+        """Get list of Python files to analyze from directory.
+
+        Args:
+            directory: Directory to search
+            recursive: Whether to search recursively
+            exclude_patterns: Patterns to exclude
+            include_patterns: Patterns to include (if specified, only these)
+
+        Returns:
+            List of Python file paths to analyze
+
+        """
         pattern = "**/*.py" if recursive else "*.py"
+        all_files = list(directory.glob(pattern))
 
-        for file_path in directory.glob(pattern):
-            # Skip excluded files
-            if any(file_path.match(pattern) for pattern in exclude_patterns):
-                continue
+        return [
+            file_path
+            for file_path in all_files
+            if self._should_include_file(file_path, exclude_patterns, include_patterns)
+        ]
 
-            # If include patterns are specified, only include matching files
-            if include_patterns and not any(file_path.match(pattern) for pattern in include_patterns):
-                continue
+    def _should_include_file(
+        self, file_path: Path, exclude_patterns: List[str], include_patterns: List[str]
+    ) -> bool:
+        """Determine if a file should be included in analysis.
 
+        Args:
+            file_path: Path to the file
+            exclude_patterns: Patterns to exclude
+            include_patterns: Patterns to include (if specified, only these)
+
+        Returns:
+            True if file should be included
+
+        """
+        # Skip excluded files
+        if any(file_path.match(pattern) for pattern in exclude_patterns):
+            return False
+
+        # If include patterns are specified, only include matching files
+        if include_patterns:
+            return any(file_path.match(pattern) for pattern in include_patterns)
+
+        return True
+
+    def _analyze_files(self, files: List[Path]) -> List[FileComplexityResult]:
+        """Analyze a list of files.
+
+        Args:
+            files: List of file paths to analyze
+
+        Returns:
+            List of analysis results
+
+        """
+        results = []
+        for file_path in files:
             result = self.analyze_file(file_path)
             if result:
                 results.append(result)
-
         return results
 
     def _analyze_source(

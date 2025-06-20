@@ -20,17 +20,31 @@ class TestComplexityAnalyzer:
 
         result = analyzer.analyze_file(fixture_path)
 
-        assert result is not None
-        assert isinstance(result, FileComplexityResult)
-        assert result.file_path == str(fixture_path)
-        assert len(result.functions) > 0
+        assert result is not None, f"Failed to analyze file {fixture_path}"
+        assert isinstance(result, FileComplexityResult), (
+            f"Expected FileComplexityResult, got {type(result)}"
+        )
+        assert result.file_path == str(fixture_path), (
+            f"Expected file path {fixture_path}, got {result.file_path}"
+        )
+        assert len(result.functions) > 0, (
+            f"Expected to find functions in {fixture_path}, found none"
+        )
 
         # Check that we found expected functions
         function_names = [f.name for f in result.functions]
-        assert "simple_function" in function_names
-        assert "function_with_if" in function_names
-        assert "complex_function" in function_names
-        assert "async_function" in function_names
+        assert "simple_function" in function_names, (
+            f"Expected 'simple_function' in {function_names}"
+        )
+        assert "function_with_if" in function_names, (
+            f"Expected 'function_with_if' in {function_names}"
+        )
+        assert "complex_function" in function_names, (
+            f"Expected 'complex_function' in {function_names}"
+        )
+        assert "async_function" in function_names, (
+            f"Expected 'async_function' in {function_names}"
+        )
 
     def test_analyze_nonexistent_file(self):
         """Test analyzing a file that doesn't exist."""
@@ -38,7 +52,7 @@ class TestComplexityAnalyzer:
 
         result = analyzer.analyze_file("nonexistent.py")
 
-        assert result is None
+        assert result is None, "Expected None for nonexistent file, but got a result"
 
     def test_analyze_non_python_file(self):
         """Test analyzing a non-Python file."""
@@ -214,3 +228,116 @@ def function_with_condition(x):
             max_cognitive=10,
         )
         assert result_high.status == "HIGH"
+
+    def test_analyze_file_with_syntax_error(self):
+        """Test analyzing a file with syntax errors."""
+        analyzer = ComplexityAnalyzer()
+
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("def broken_function(\n    # Missing closing parenthesis")
+            f.flush()
+
+            result = analyzer.analyze_file(f.name)
+            assert result is None
+
+    def test_analyzer_with_max_complexity_threshold(self):
+        """Test analyzer with complexity threshold for should_fail."""
+        analyzer = ComplexityAnalyzer(max_complexity=5)
+
+        # Create a result that exceeds threshold
+        high_complexity_func = ComplexityResult(
+            name="complex_func",
+            cyclomatic_complexity=10,  # Exceeds threshold of 5
+            cognitive_complexity=3,
+            lineno=1,
+            col_offset=0,
+        )
+
+        result = FileComplexityResult(
+            file_path="test.py",
+            functions=[high_complexity_func],
+            total_cyclomatic=10,
+            total_cognitive=3,
+            max_cyclomatic=10,
+            max_cognitive=3,
+        )
+
+        assert analyzer.should_fail([result]) is True, (
+            f"Expected should_fail=True for complexity {result.max_cyclomatic} > threshold {analyzer.max_complexity}"
+        )
+
+    def test_analyzer_should_fail_no_threshold(self):
+        """Test should_fail when no threshold is set."""
+        analyzer = ComplexityAnalyzer()  # No max_complexity set
+
+        # Create a result with high complexity
+        high_complexity_func = ComplexityResult(
+            name="complex_func",
+            cyclomatic_complexity=20,
+            cognitive_complexity=15,
+            lineno=1,
+            col_offset=0,
+        )
+
+        result = FileComplexityResult(
+            file_path="test.py",
+            functions=[high_complexity_func],
+            total_cyclomatic=20,
+            total_cognitive=15,
+            max_cyclomatic=20,
+            max_cognitive=15,
+        )
+
+        # Should not fail when no threshold is set
+        assert analyzer.should_fail([result]) is False
+
+    def test_analyze_empty_python_file(self):
+        """Test analyzing an empty Python file."""
+        analyzer = ComplexityAnalyzer()
+
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("")  # Empty file
+            f.flush()
+
+            result = analyzer.analyze_file(f.name)
+
+            assert result is not None
+            assert len(result.functions) == 0
+            assert result.total_cyclomatic == 0
+            assert result.total_cognitive == 0
+            assert result.max_cyclomatic == 0
+            assert result.max_cognitive == 0
+
+    def test_analyze_file_with_only_comments(self):
+        """Test analyzing a file with only comments."""
+        analyzer = ComplexityAnalyzer()
+
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("# This is just a comment\n# Another comment\n")
+            f.flush()
+
+            result = analyzer.analyze_file(f.name)
+
+            assert result is not None
+            assert len(result.functions) == 0
+
+    def test_analyze_directory_nonexistent(self):
+        """Test analyzing a directory that doesn't exist."""
+        analyzer = ComplexityAnalyzer()
+
+        results = analyzer.analyze_directory("nonexistent_directory")
+
+        assert len(results) == 0
+
+    def test_analyze_directory_is_file(self):
+        """Test analyzing a directory path that is actually a file."""
+        analyzer = ComplexityAnalyzer()
+
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("def test(): pass")
+            f.flush()
+
+            # Try to analyze file as if it's a directory
+            results = analyzer.analyze_directory(f.name)
+
+            assert len(results) == 0

@@ -47,9 +47,10 @@ def main(ctx: click.Context) -> None:
 
     \b
     COMMANDS:
-      check        Validate complexity thresholds (CI-friendly)
-      show-list    Display detailed complexity metrics
-      show-summary Show aggregated statistics
+      check          Validate complexity thresholds (CI-friendly)
+      show-list      Display detailed complexity metrics
+      show-functions Show function-level complexity metrics
+      show-summary   Show aggregated statistics
 
     \b
     CONFIGURATION:
@@ -243,6 +244,95 @@ def show_list(
 
     # Format and display output
     format_and_display_output(all_results, output_format, formatter)
+
+
+@main.command()
+@click.argument("paths", nargs=-1, type=click.Path(exists=True), required=False)
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["table", "json", "csv"], case_sensitive=False),
+    default="table",
+    help="Output format: table|json|csv (default: table)",
+)
+@click.option(
+    "--recursive/--no-recursive",
+    default=True,
+    help="Recursively analyze directories (default: True)",
+)
+@click.option(
+    "--exclude", multiple=True, help="Exclude files matching these glob patterns"
+)
+@click.option(
+    "--include", multiple=True, help="Include only files matching these glob patterns"
+)
+@click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
+@click.option("--log-level", default="WARNING", help="Set logging level")
+def show_functions(
+    paths: tuple,
+    output_format: str,
+    recursive: bool,
+    exclude: tuple,
+    include: tuple,
+    verbose: bool,
+    log_level: str,
+) -> None:
+    """Show function-level complexity metrics
+
+    \b
+    PURPOSE:
+      Display complexity metrics for individual functions and methods.
+      Focus on function-level details rather than file-level summaries.
+      Perfect for identifying specific functions that need refactoring.
+
+    \b
+    EXAMPLES:
+      pycomplex show-functions                 # Use pyproject.toml config
+      pycomplex show-functions src/           # Analyze specific directory
+      pycomplex show-functions --format json  # JSON output for tools
+      pycomplex show-functions --format csv   # Spreadsheet-friendly
+
+    \b
+    OUTPUT FORMATS:
+      table      Function table grouped by file (default)
+      json       Machine-readable JSON with function details
+      csv        Function-level CSV data
+    """
+    # Setup logging
+    setup_logging(level=log_level)
+
+    # Load configuration and merge with CLI options
+    merged_config = load_and_merge_config(
+        exclude=exclude,
+        include=include,
+        paths=paths,
+    )
+
+    final_exclude = merged_config["exclude"]
+    final_include = merged_config["include"]
+    final_paths = merged_config["paths"]
+
+    # Create analyzer and service
+    analyzer, service = create_analyzer_service()
+    formatter = OutputFormatter()
+
+    # Analyze paths
+    all_results = service.analyze_paths(
+        tuple(final_paths), recursive, final_exclude, final_include, verbose
+    )
+
+    if not all_results:
+        handle_no_results()
+
+    # Format and display function-level output
+    if output_format == "table":
+        output = formatter.format_detailed_table(all_results)
+    elif output_format == "json":
+        output = formatter.format_functions_json(all_results)
+    elif output_format == "csv":
+        output = formatter.format_functions_csv(all_results)
+
+    click.echo(output)
 
 
 @main.command()

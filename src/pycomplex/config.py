@@ -98,9 +98,19 @@ class PyComplexConfig:
     def get_status_thresholds(self) -> Dict[str, Dict[str, int]]:
         """Get status classification thresholds."""
         config = self._load_config()
+        default_thresholds = self._get_default_thresholds()
+        configured_thresholds = config.get("status-thresholds", {})
 
-        # Default thresholds
-        default_thresholds = {
+        return self._merge_thresholds(default_thresholds, configured_thresholds)
+
+    def _get_default_thresholds(self) -> Dict[str, Dict[str, int]]:
+        """Get the default status thresholds.
+
+        Returns:
+            Default threshold configuration
+
+        """
+        return {
             "medium": {
                 "cyclomatic": 5,
                 "cognitive": 4,
@@ -111,30 +121,40 @@ class PyComplexConfig:
             },
         }
 
-        # Override with config values if present
-        thresholds = config.get("status-thresholds", {})
+    def _merge_thresholds(
+        self, defaults: Dict[str, Dict[str, int]], overrides: Dict[str, Any]
+    ) -> Dict[str, Dict[str, int]]:
+        """Merge default thresholds with configuration overrides.
 
-        if "medium" in thresholds:
-            if "cyclomatic" in thresholds["medium"]:
-                default_thresholds["medium"]["cyclomatic"] = thresholds["medium"][
-                    "cyclomatic"
-                ]
-            if "cognitive" in thresholds["medium"]:
-                default_thresholds["medium"]["cognitive"] = thresholds["medium"][
-                    "cognitive"
-                ]
+        Args:
+            defaults: Default threshold values
+            overrides: Configuration override values
 
-        if "high" in thresholds:
-            if "cyclomatic" in thresholds["high"]:
-                default_thresholds["high"]["cyclomatic"] = thresholds["high"][
-                    "cyclomatic"
-                ]
-            if "cognitive" in thresholds["high"]:
-                default_thresholds["high"]["cognitive"] = thresholds["high"][
-                    "cognitive"
-                ]
+        Returns:
+            Merged threshold configuration
 
-        return default_thresholds
+        """
+        result = defaults.copy()
+
+        for level in ["medium", "high"]:
+            if level in overrides:
+                self._update_threshold_level(result[level], overrides[level])
+
+        return result
+
+    def _update_threshold_level(
+        self, default_level: Dict[str, int], override_level: Dict[str, Any]
+    ) -> None:
+        """Update a specific threshold level with overrides.
+
+        Args:
+            default_level: Default values for this level (modified in place)
+            override_level: Override values for this level
+
+        """
+        for metric in ["cyclomatic", "cognitive"]:
+            if metric in override_level:
+                default_level[metric] = override_level[metric]
 
     def merge_with_cli_options(
         self,

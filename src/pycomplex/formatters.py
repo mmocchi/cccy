@@ -192,6 +192,79 @@ class OutputFormatter:
         return output.getvalue()
 
     @staticmethod
+    def format_functions_json(results: List[FileComplexityResult]) -> str:
+        """Format function-level results as JSON.
+
+        Args:
+            results: List of file complexity results
+
+        Returns:
+            JSON formatted string focused on functions
+
+        """
+        data = []
+
+        for result in results:
+            for func in result.functions:
+                data.append(
+                    {
+                        "file_path": result.file_path,
+                        "function_name": func.name,
+                        "line_number": func.lineno,
+                        "end_line_number": func.end_lineno,
+                        "cyclomatic_complexity": func.cyclomatic_complexity,
+                        "cognitive_complexity": func.cognitive_complexity,
+                        "file_status": result.status,
+                    }
+                )
+
+        return json.dumps(data, indent=2)
+
+    @staticmethod
+    def format_functions_csv(results: List[FileComplexityResult]) -> str:
+        """Format function-level results as CSV.
+
+        Args:
+            results: List of file complexity results
+
+        Returns:
+            CSV formatted string focused on functions
+
+        """
+        output = StringIO()
+        writer = csv.writer(output)
+
+        # Write header
+        writer.writerow(
+            [
+                "file_path",
+                "function_name",
+                "line_number",
+                "end_line_number",
+                "cyclomatic_complexity",
+                "cognitive_complexity",
+                "file_status",
+            ]
+        )
+
+        # Write data rows
+        for result in results:
+            for func in result.functions:
+                writer.writerow(
+                    [
+                        result.file_path,
+                        func.name,
+                        func.lineno,
+                        func.end_lineno,
+                        func.cyclomatic_complexity,
+                        func.cognitive_complexity,
+                        result.status,
+                    ]
+                )
+
+        return output.getvalue()
+
+    @staticmethod
     def format_summary(results: List[FileComplexityResult]) -> str:
         """Format a summary of the analysis results.
 

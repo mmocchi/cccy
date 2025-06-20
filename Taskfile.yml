@@ -1,0 +1,67 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install dependencies with uv
+    cmds:
+      - uv sync --dev
+  
+  test:
+    desc: Run tests
+    cmds:
+      - uv run pytest
+  
+  lint:
+    desc: Run linting and type checking
+    cmds:
+      - uv run ruff check
+      - uv run mypy src/
+  
+  format:
+    desc: Format code
+    cmds:
+      - uv run ruff format
+  
+  format-check:
+    desc: Check code formatting
+    cmds:
+      - uv run ruff format --check
+  
+  complexity:
+    desc: Analyze code complexity
+    cmds:
+      - uv run pycomplex show-list src/
+  
+  complexity-summary:
+    desc: Show complexity summary
+    cmds:
+      - uv run pycomplex show-summary src/
+  
+  complexity-check:
+    desc: "Check complexity thresholds (max cyclomatic: 10)"
+    cmds:
+      - uv run pycomplex check --max-complexity 10 src/
+  
+  check:
+    desc: Run all checks (complexity, linting, formatting)
+    cmds:
+      - task: complexity-check
+      - task: lint
+      - task: format-check
+  
+  build:
+    desc: Build package
+    cmds:
+      - uv build
+  
+  dev:
+    desc: Install in development mode
+    cmds:
+      - uv pip install -e .
+  
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf dist/ build/ *.egg-info/
+      - find . -type d -name __pycache__ -exec rm -rf {} +
+      - find . -type f -name "*.pyc" -delete

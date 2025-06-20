@@ -1,0 +1,77 @@
+name: 'Python Complexity Analysis'
+description: 'Analyze Python code complexity with pycomplex'
+author: 'pycomplex'
+
+inputs:
+  path:
+    description: 'Path to analyze (file or directory)'
+    required: true
+    default: '.'
+  format:
+    description: 'Output format (table, json, csv, detailed)'
+    required: false
+    default: 'table'
+  max-complexity:
+    description: 'Maximum allowed cyclomatic complexity'
+    required: false
+  recursive:
+    description: 'Recursively analyze directories'
+    required: false
+    default: 'true'
+  exclude:
+    description: 'Exclude patterns (comma-separated)'
+    required: false
+  summary:
+    description: 'Show summary statistics'
+    required: false
+    default: 'false'
+
+outputs:
+  complexity-report:
+    description: 'Complexity analysis report'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install uv
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "latest"
+    
+    - name: Install pycomplex
+      shell: bash
+      run: uv tool install pycomplex
+    
+    - name: Run complexity analysis
+      shell: bash
+      run: |
+        args=("${{ inputs.path }}")
+        
+        if [ "${{ inputs.format }}" != "table" ]; then
+          args+=("--format" "${{ inputs.format }}")
+        fi
+        
+        if [ -n "${{ inputs.max-complexity }}" ]; then
+          args+=("--max-complexity" "${{ inputs.max-complexity }}")
+        fi
+        
+        if [ "${{ inputs.recursive }}" == "false" ]; then
+          args+=("--no-recursive")
+        fi
+        
+        if [ -n "${{ inputs.exclude }}" ]; then
+          IFS=',' read -ra EXCLUDE_PATTERNS <<< "${{ inputs.exclude }}"
+          for pattern in "${EXCLUDE_PATTERNS[@]}"; do
+            args+=("--exclude" "$pattern")
+          done
+        fi
+        
+        if [ "${{ inputs.summary }}" == "true" ]; then
+          args+=("--summary")
+        fi
+        
+        uv tool run pycomplex "${args[@]}"
+
+branding:
+  icon: 'bar-chart-2'
+  color: 'blue'

@@ -1,0 +1,216 @@
+"""Tests for the complexity analyzer module."""
+
+import tempfile
+from pathlib import Path
+
+from pycomplex.analyzer import (
+    ComplexityAnalyzer,
+    ComplexityResult,
+    FileComplexityResult,
+)
+
+
+class TestComplexityAnalyzer:
+    """Test cases for ComplexityAnalyzer."""
+
+    def test_analyze_simple_file(self):
+        """Test analyzing a simple Python file."""
+        analyzer = ComplexityAnalyzer()
+        fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
+
+        result = analyzer.analyze_file(fixture_path)
+
+        assert result is not None
+        assert isinstance(result, FileComplexityResult)
+        assert result.file_path == str(fixture_path)
+        assert len(result.functions) > 0
+
+        # Check that we found expected functions
+        function_names = [f.name for f in result.functions]
+        assert "simple_function" in function_names
+        assert "function_with_if" in function_names
+        assert "complex_function" in function_names
+        assert "async_function" in function_names
+
+    def test_analyze_nonexistent_file(self):
+        """Test analyzing a file that doesn't exist."""
+        analyzer = ComplexityAnalyzer()
+
+        result = analyzer.analyze_file("nonexistent.py")
+
+        assert result is None
+
+    def test_analyze_non_python_file(self):
+        """Test analyzing a non-Python file."""
+        analyzer = ComplexityAnalyzer()
+
+        with tempfile.NamedTemporaryFile(suffix=".txt", mode="w", delete=False) as f:
+            f.write("This is not Python code")
+            f.flush()
+
+            result = analyzer.analyze_file(f.name)
+
+        assert result is None
+
+    def test_analyze_directory(self):
+        """Test analyzing a directory."""
+        analyzer = ComplexityAnalyzer()
+        fixtures_dir = Path(__file__).parent / "fixtures"
+
+        results = analyzer.analyze_directory(fixtures_dir, recursive=False)
+
+        assert len(results) >= 1
+        assert all(isinstance(r, FileComplexityResult) for r in results)
+
+        # Should find our test fixture
+        file_paths = [r.file_path for r in results]
+        assert any("simple.py" in path for path in file_paths)
+
+    def test_analyze_directory_with_exclusions(self):
+        """Test analyzing a directory with exclusion patterns."""
+        analyzer = ComplexityAnalyzer()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+
+            # Create test files
+            (tmpdir_path / "include.py").write_text("def test(): pass")
+            (tmpdir_path / "exclude.py").write_text("def test(): pass")
+
+            results = analyzer.analyze_directory(
+                tmpdir_path, recursive=False, exclude_patterns=["exclude.py"]
+            )
+
+            file_paths = [Path(r.file_path).name for r in results]
+            assert "include.py" in file_paths
+            assert "exclude.py" not in file_paths
+
+    def test_complexity_calculation(self):
+        """Test that complexity calculations return reasonable values."""
+        analyzer = ComplexityAnalyzer()
+        fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
+
+        result = analyzer.analyze_file(fixture_path)
+
+        assert result is not None
+
+        # Find the simple function
+        simple_func = next(f for f in result.functions if f.name == "simple_function")
+        assert simple_func.cyclomatic_complexity >= 1
+        assert simple_func.cognitive_complexity >= 0
+
+        # Find the complex function
+        complex_func = next(f for f in result.functions if f.name == "complex_function")
+        assert complex_func.cyclomatic_complexity > simple_func.cyclomatic_complexity
+        assert complex_func.cognitive_complexity > simple_func.cognitive_complexity
+
+    def test_status_calculation(self):
+        """Test that status is calculated correctly."""
+        analyzer = ComplexityAnalyzer()
+        fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
+
+        result = analyzer.analyze_file(fixture_path)
+
+        assert result is not None
+        assert result.status in ["OK", "MEDIUM", "HIGH"]
+
+    def test_max_complexity_threshold(self):
+        """Test analyzer with complexity threshold."""
+        analyzer = ComplexityAnalyzer(max_complexity=1)
+        fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
+
+        result = analyzer.analyze_file(fixture_path)
+        assert result is not None
+
+        results = [result]
+        should_fail = analyzer.should_fail(results)
+
+        # Should fail because complex_function likely exceeds threshold of 1
+        assert should_fail is True
+
+    def test_analyze_source_with_syntax_error(self):
+        """Test analyzing source code with syntax errors."""
+        analyzer = ComplexityAnalyzer()
+
+        # Invalid Python syntax
+        invalid_code = "def invalid_function(\n    pass"
+
+        result = analyzer._analyze_source("test.py", invalid_code)
+
+        assert result is None
+
+    def test_analyze_source_with_valid_code(self):
+        """Test analyzing valid source code."""
+        analyzer = ComplexityAnalyzer()
+
+        valid_code = """
+def simple_function():
+    return 42
+
+def function_with_condition(x):
+    if x > 0:
+        return x
+    return 0
+"""
+
+        result = analyzer._analyze_source("test.py", valid_code)
+
+        assert result is not None
+        assert len(result.functions) == 2
+        assert result.functions[0].name == "simple_function"
+        assert result.functions[1].name == "function_with_condition"
+
+    def test_complexity_result_properties(self):
+        """Test ComplexityResult named tuple properties."""
+        result = ComplexityResult(
+            name="test_func",
+            cyclomatic_complexity=5,
+            cognitive_complexity=3,
+            lineno=10,
+            col_offset=0,
+            end_lineno=15,
+            end_col_offset=10,
+        )
+
+        assert result.name == "test_func"
+        assert result.cyclomatic_complexity == 5
+        assert result.cognitive_complexity == 3
+        assert result.lineno == 10
+        assert result.col_offset == 0
+        assert result.end_lineno == 15
+        assert result.end_col_offset == 10
+
+    def test_file_complexity_result_status_property(self):
+        """Test FileComplexityResult status property."""
+        # Test OK status
+        result_ok = FileComplexityResult(
+            file_path="test.py",
+            functions=[],
+            total_cyclomatic=2,
+            total_cognitive=1,
+            max_cyclomatic=2,
+            max_cognitive=1,
+        )
+        assert result_ok.status == "OK"
+
+        # Test MEDIUM status
+        result_medium = FileComplexityResult(
+            file_path="test.py",
+            functions=[],
+            total_cyclomatic=8,
+            total_cognitive=5,
+            max_cyclomatic=8,
+            max_cognitive=5,
+        )
+        assert result_medium.status == "MEDIUM"
+
+        # Test HIGH status
+        result_high = FileComplexityResult(
+            file_path="test.py",
+            functions=[],
+            total_cyclomatic=15,
+            total_cognitive=10,
+            max_cyclomatic=15,
+            max_cognitive=10,
+        )
+        assert result_high.status == "HIGH"

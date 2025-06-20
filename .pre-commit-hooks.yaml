@@ -1,0 +1,9 @@
+- id: pycomplex
+  name: Python Complexity Check
+  description: Check Python code complexity using pycomplex
+  entry: pycomplex
+  language: python
+  files: \.py$
+  args: [--max-complexity=10]
+  additional_dependencies:
+    - pycomplex

@@ -17,7 +17,10 @@ class TestCLI:
         result = runner.invoke(main, ["--help"])
 
         assert result.exit_code == 0
-        assert "Analyze Python code for Cyclomatic and Cognitive complexity" in result.output
+        assert (
+            "Analyze Python code for Cyclomatic and Cognitive complexity"
+            in result.output
+        )
         assert "check" in result.output
         assert "show-list" in result.output
         assert "show-summary" in result.output
@@ -57,7 +60,9 @@ class TestCLI:
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
-        result = runner.invoke(main, ["show-list", "--format", "json", str(fixture_path)])
+        result = runner.invoke(
+            main, ["show-list", "--format", "json", str(fixture_path)]
+        )
 
         assert result.exit_code == 0
         # Should be valid JSON
@@ -72,7 +77,9 @@ class TestCLI:
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
-        result = runner.invoke(main, ["show-list", "--format", "csv", str(fixture_path)])
+        result = runner.invoke(
+            main, ["show-list", "--format", "csv", str(fixture_path)]
+        )
 
         assert result.exit_code == 0
         lines = result.output.strip().split("\n")
@@ -86,7 +93,9 @@ class TestCLI:
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
-        result = runner.invoke(main, ["show-list", "--format", "detailed", str(fixture_path)])
+        result = runner.invoke(
+            main, ["show-list", "--format", "detailed", str(fixture_path)]
+        )
 
         assert result.exit_code == 0
         assert "simple.py" in result.output
@@ -100,7 +109,9 @@ class TestCLI:
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
         # Set very low threshold to trigger failure
-        result = runner.invoke(main, ["check", "--max-complexity", "1", str(fixture_path)])
+        result = runner.invoke(
+            main, ["check", "--max-complexity", "1", str(fixture_path)]
+        )
 
         # Should exit with error code due to complex functions
         assert result.exit_code == 1
@@ -111,7 +122,17 @@ class TestCLI:
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
         # Set high threshold that shouldn't trigger failure
-        result = runner.invoke(main, ["check", "--max-complexity", "100", "--max-cognitive", "100", str(fixture_path)])
+        result = runner.invoke(
+            main,
+            [
+                "check",
+                "--max-complexity",
+                "100",
+                "--max-cognitive",
+                "100",
+                str(fixture_path),
+            ],
+        )
 
         assert result.exit_code == 0
 
@@ -149,7 +170,9 @@ class TestCLI:
             (tmpdir_path / "include.py").write_text("def test(): pass")
             (tmpdir_path / "exclude.py").write_text("def test(): pass")
 
-            result = runner.invoke(main, ["show-list", "--exclude", "exclude.py", str(tmpdir_path)])
+            result = runner.invoke(
+                main, ["show-list", "--exclude", "exclude.py", str(tmpdir_path)]
+            )
 
             assert result.exit_code == 0
             assert "include.py" in result.output
@@ -168,7 +191,9 @@ class TestCLI:
             (tmpdir_path / "root.py").write_text("def root(): pass")
             (subdir / "sub.py").write_text("def sub(): pass")
 
-            result = runner.invoke(main, ["show-list", "--no-recursive", str(tmpdir_path)])
+            result = runner.invoke(
+                main, ["show-list", "--no-recursive", str(tmpdir_path)]
+            )
 
             assert result.exit_code == 0
             assert "root.py" in result.output
@@ -190,7 +215,9 @@ class TestCLI:
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
         # Same file twice
-        result = runner.invoke(main, ["show-list", str(fixture_path), str(fixture_path)])
+        result = runner.invoke(
+            main, ["show-list", str(fixture_path), str(fixture_path)]
+        )
 
         assert result.exit_code == 0
         # Should appear twice in output
@@ -213,7 +240,9 @@ class TestCLI:
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
-        result = runner.invoke(main, ["show-list", "--format", "invalid", str(fixture_path)])
+        result = runner.invoke(
+            main, ["show-list", "--format", "invalid", str(fixture_path)]
+        )
 
         assert result.exit_code != 0
         assert "Invalid value" in result.output or "Choose from" in result.output

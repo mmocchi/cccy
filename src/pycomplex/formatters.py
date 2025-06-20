@@ -22,6 +22,7 @@ class OutputFormatter:
 
         Returns:
             Formatted table string
+
         """
         if not results:
             return "No Python files analyzed."
@@ -50,6 +51,7 @@ class OutputFormatter:
 
         Returns:
             Formatted detailed table string
+
         """
         if not results:
             return "No Python files analyzed."
@@ -93,6 +95,7 @@ class OutputFormatter:
 
         Returns:
             JSON formatted string
+
         """
         data = []
 
@@ -136,6 +139,7 @@ class OutputFormatter:
 
         Returns:
             CSV formatted string
+
         """
         output = StringIO()
         writer = csv.writer(output)
@@ -196,6 +200,7 @@ class OutputFormatter:
 
         Returns:
             Summary string
+
         """
         if not results:
             return "No Python files analyzed."

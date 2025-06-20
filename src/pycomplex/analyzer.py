@@ -4,8 +4,10 @@ import ast
 from pathlib import Path
 from typing import List, NamedTuple, Optional, Union
 
-import mccabe
-from cognitive_complexity.api import get_cognitive_complexity
+from .complexity_calculators import (
+    CognitiveComplexityCalculator,
+    CyclomaticComplexityCalculator,
+)
 
 
 class ComplexityResult(NamedTuple):
@@ -30,27 +32,64 @@ class FileComplexityResult(NamedTuple):
     max_cyclomatic: int
     max_cognitive: int
 
+    def get_status(self, thresholds: Optional[dict] = None) -> str:
+        """Return status based on complexity thresholds.
+
+        Args:
+            thresholds: Optional custom thresholds dict with structure:
+                       {
+                           "medium": {"cyclomatic": 5, "cognitive": 4},
+                           "high": {"cyclomatic": 10, "cognitive": 7}
+                       }
+
+        Returns:
+            Status string: "OK", "MEDIUM", or "HIGH"
+
+        """
+        # Use default thresholds if none provided
+        if thresholds is None:
+            thresholds = {
+                "medium": {"cyclomatic": 5, "cognitive": 4},
+                "high": {"cyclomatic": 10, "cognitive": 7},
+            }
+
+        high_cyclomatic = thresholds["high"]["cyclomatic"]
+        high_cognitive = thresholds["high"]["cognitive"]
+        medium_cyclomatic = thresholds["medium"]["cyclomatic"]
+        medium_cognitive = thresholds["medium"]["cognitive"]
+
+        if self.max_cyclomatic > high_cyclomatic or self.max_cognitive > high_cognitive:
+            return "HIGH"
+        if (
+            self.max_cyclomatic > medium_cyclomatic
+            or self.max_cognitive > medium_cognitive
+        ):
+            return "MEDIUM"
+        return "OK"
+
     @property
     def status(self) -> str:
-        """Return status based on complexity thresholds."""
-        if self.max_cyclomatic > 10 or self.max_cognitive > 7:
-            return "HIGH"
-        elif self.max_cyclomatic > 5 or self.max_cognitive > 4:
-            return "MEDIUM"
-        else:
-            return "OK"
+        """Return status based on default complexity thresholds.
+
+        This property is kept for backward compatibility.
+        For configurable thresholds, use get_status() method.
+        """
+        return self.get_status()
 
 
 class ComplexityAnalyzer:
     """Analyzes Python source code for complexity metrics."""
 
-    def __init__(self, max_complexity: Optional[int] = None):
+    def __init__(self, max_complexity: Optional[int] = None) -> None:
         """Initialize analyzer with optional complexity threshold.
 
         Args:
             max_complexity: Maximum allowed cyclomatic complexity
+
         """
         self.max_complexity = max_complexity
+        self.cyclomatic_calculator = CyclomaticComplexityCalculator()
+        self.cognitive_calculator = CognitiveComplexityCalculator()
 
     def analyze_file(
         self, file_path: Union[str, Path]
@@ -62,6 +101,7 @@ class ComplexityAnalyzer:
 
         Returns:
             FileComplexityResult or None if file cannot be analyzed
+
         """
         file_path = Path(file_path)
 
@@ -72,7 +112,7 @@ class ComplexityAnalyzer:
             return None
 
         try:
-            with open(file_path, encoding="utf-8") as f:
+            with file_path.open(encoding="utf-8") as f:
                 source_code = f.read()
 
             return self._analyze_source(str(file_path), source_code)
@@ -96,6 +136,7 @@ class ComplexityAnalyzer:
 
         Returns:
             List of FileComplexityResult objects
+
         """
         directory = Path(directory)
         exclude_patterns = exclude_patterns or []
@@ -111,11 +152,10 @@ class ComplexityAnalyzer:
             # Skip excluded files
             if any(file_path.match(pattern) for pattern in exclude_patterns):
                 continue
-            
+
             # If include patterns are specified, only include matching files
-            if include_patterns:
-                if not any(file_path.match(pattern) for pattern in include_patterns):
-                    continue
+            if include_patterns and not any(file_path.match(pattern) for pattern in include_patterns):
+                continue
 
             result = self.analyze_file(file_path)
             if result:
@@ -134,6 +174,7 @@ class ComplexityAnalyzer:
 
         Returns:
             FileComplexityResult or None if analysis fails
+
         """
         try:
             tree = ast.parse(source_code)
@@ -148,11 +189,11 @@ class ComplexityAnalyzer:
 
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                # Calculate cyclomatic complexity using mccabe
-                cyclomatic = self._calculate_cyclomatic_complexity(node)
+                # Calculate cyclomatic complexity using calculator
+                cyclomatic = self.cyclomatic_calculator.calculate(node)
 
-                # Calculate cognitive complexity
-                cognitive = self._calculate_cognitive_complexity(node)
+                # Calculate cognitive complexity using calculator
+                cognitive = self.cognitive_calculator.calculate(node)
 
                 result = ComplexityResult(
                     name=node.name,
@@ -179,51 +220,6 @@ class ComplexityAnalyzer:
             max_cognitive=max_cognitive,
         )
 
-    def _calculate_cyclomatic_complexity(
-        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
-    ) -> int:
-        """Calculate cyclomatic complexity for a function node.
-
-        Args:
-            node: AST node representing a function
-
-        Returns:
-            Cyclomatic complexity score
-        """
-        try:
-            # Create a temporary module with just this function
-            module = ast.Module(body=[node], type_ignores=[])
-
-            # Use mccabe to calculate complexity
-            visitor = mccabe.PathGraphingAstVisitor()
-            visitor.preorder(module, visitor)
-
-            for graph in visitor.graphs.values():
-                if graph.entity == node.name:
-                    complexity = graph.complexity()
-                    return int(complexity) if complexity is not None else 1
-
-            return 1  # Default complexity for simple functions
-        except Exception:
-            return 1
-
-    def _calculate_cognitive_complexity(
-        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
-    ) -> int:
-        """Calculate cognitive complexity for a function node.
-
-        Args:
-            node: AST node representing a function
-
-        Returns:
-            Cognitive complexity score
-        """
-        try:
-            complexity = get_cognitive_complexity(node)
-            return int(complexity) if complexity is not None else 0
-        except Exception:
-            return 0
-
     def should_fail(self, results: List[FileComplexityResult]) -> bool:
         """Determine if analysis should fail based on complexity thresholds.
 
@@ -232,12 +228,9 @@ class ComplexityAnalyzer:
 
         Returns:
             True if any file exceeds complexity threshold
+
         """
         if not self.max_complexity:
             return False
 
-        for result in results:
-            if result.max_cyclomatic > self.max_complexity:
-                return True
-
-        return False
+        return any(result.max_cyclomatic > self.max_complexity for result in results)

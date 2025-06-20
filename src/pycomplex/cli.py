@@ -15,14 +15,40 @@ from .formatters import OutputFormatter
 @click.pass_context
 @click.version_option()
 def main(ctx: click.Context) -> None:
-    """Python complexity measurement tool.
+    """
+    \b
+    ┌─────────────────────────────────────────────────────────┐
+    │  ___        ___                 _                       │
+    │ | _ \_  _  / __|___ _ __  _ __ | |_____ __              │
+    │ |  _/ || || (__/ _ \ '  \| '_ \| / -_) \ /              │
+    │ |_|  \_, | \___\___/_|_|_| .__/|_\___/_\_\              │
+    │      |__/                |_|                            │
+    │                                                         │
+    │ Python Code Complexity Analyzer - v0.1.0                │
+    │                                                         │
+    └─────────────────────────────────────────────────────────┘
 
+    \b
     Analyze Python code for Cyclomatic and Cognitive complexity.
-
-    Examples:
-        pycomplex show-list src/
-        pycomplex check --max-complexity 10 src/
-        pycomplex show-summary src/
+    Enforce complexity thresholds in CI/CD pipelines.
+    Configure via pyproject.toml for project-wide settings.
+    
+    \b
+    QUICK START:
+      pycomplex check                    # Use pyproject.toml config
+      pycomplex show-list src/           # Analyze src/ directory
+      pycomplex check --max-complexity 10 src/
+    
+    \b
+    COMMANDS:
+      check        Validate complexity thresholds (CI-friendly)
+      show-list    Display detailed complexity metrics
+      show-summary Show aggregated statistics
+    
+    \b
+    CONFIGURATION:
+      Add [tool.pycomplex] section to pyproject.toml
+      Set max-complexity, exclude patterns, default paths, etc.
     """
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
@@ -61,15 +87,25 @@ def check(
     include: tuple,
     verbose: bool,
 ) -> None:
-    """Check if complexity exceeds thresholds.
+    """Check if complexity exceeds thresholds (CI/CD friendly)
 
-    Returns exit code 1 if any file exceeds the complexity thresholds.
-    Only shows files that exceed the limits.
+    \b
+    PURPOSE:
+      Validate code complexity against defined thresholds.
+      Exit with code 1 if any violations found (perfect for CI/CD).
+      Only displays files that exceed the limits.
 
-    Examples:
-        pycomplex check --max-complexity 10 src/
-        pycomplex check --max-complexity 10 --max-cognitive 7 src/
-        pycomplex check  # Uses configuration from pyproject.toml
+    \b
+    EXAMPLES:
+      pycomplex check                           # Use pyproject.toml config
+      pycomplex check --max-complexity 10 src/ # Set threshold explicitly
+      pycomplex check --max-cognitive 7 src/   # Add cognitive limit
+      pycomplex check --exclude "*/tests/*"    # Exclude test files
+
+    \b
+    CONFIGURATION:
+      CLI options override pyproject.toml settings.
+      Use --verbose to see analysis progress.
     """
     # Load configuration and merge with CLI options
     config = PyComplexConfig()
@@ -156,7 +192,7 @@ def check(
     "output_format",
     type=click.Choice(["table", "json", "csv", "detailed"], case_sensitive=False),
     default="table",
-    help="Output format (default: table)",
+    help="Output format: table|json|csv|detailed (default: table)",
 )
 @click.option(
     "--recursive/--no-recursive",
@@ -178,15 +214,28 @@ def show_list(
     include: tuple,
     verbose: bool,
 ) -> None:
-    """Show list of files with their complexity metrics.
+    """Show detailed complexity metrics for all files
 
-    Display all analyzed files with their complexity values in various formats.
+    \b
+    PURPOSE:
+      Display comprehensive complexity analysis for all files.
+      Support multiple output formats for integration.
+      Perfect for development and analysis workflows.
 
-    Examples:
-        pycomplex show-list src/
-        pycomplex show-list --format json src/
-        pycomplex show-list --format detailed file.py
-        pycomplex show-list  # Uses configuration from pyproject.toml
+    \b
+    EXAMPLES:
+      pycomplex show-list                    # Use pyproject.toml config
+      pycomplex show-list src/              # Analyze specific directory
+      pycomplex show-list --format json     # JSON output for tools
+      pycomplex show-list --format csv      # Spreadsheet-friendly
+      pycomplex show-list --format detailed # Function-level details
+
+    \b
+    OUTPUT FORMATS:
+      table      Pretty table (default)
+      detailed   Function-level breakdown
+      json       Machine-readable JSON
+      csv        Comma-separated values
     """
     # Load configuration and merge with CLI options
     config = PyComplexConfig()
@@ -249,14 +298,26 @@ def show_summary(
     include: tuple,
     verbose: bool,
 ) -> None:
-    """Show summary statistics only.
+    """Show aggregated complexity statistics
 
-    Display aggregated complexity statistics for the analyzed files.
+    \b
+    PURPOSE:
+      Display high-level overview of codebase complexity.
+      Quick health check without file-by-file details.
+      Ideal for dashboards and reporting.
 
-    Examples:
-        pycomplex show-summary src/
-        pycomplex show-summary src/ tests/
-        pycomplex show-summary  # Uses configuration from pyproject.toml
+    \b
+    EXAMPLES:
+      pycomplex show-summary              # Use pyproject.toml config
+      pycomplex show-summary src/         # Analyze specific directory
+      pycomplex show-summary src/ tests/  # Multiple directories
+
+    \b
+    OUTPUT INCLUDES:
+      • Total files and functions analyzed
+      • Status distribution (OK/MEDIUM/HIGH)
+      • List of high-complexity files
+      • Overall codebase health metrics
     """
     # Load configuration and merge with CLI options
     config = PyComplexConfig()

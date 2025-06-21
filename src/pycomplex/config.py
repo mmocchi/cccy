@@ -25,7 +25,7 @@ except ImportError:
     try:
         import tomli
 
-        toml_loader = tomli
+        toml_loader = tomli  # type: ignore[assignment]
     except ImportError:
         toml_loader = None
 

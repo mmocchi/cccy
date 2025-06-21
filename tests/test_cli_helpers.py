@@ -1,6 +1,6 @@
 """Tests for the CLI helpers module."""
 
-from typing import Any
+from typing import Any, Union, cast
 
 import pytest
 
@@ -27,7 +27,9 @@ class TestCliHelpers:
         }
 
         # Act & Assert - Should not raise any exception
-        validate_required_config(config)
+        validate_required_config(
+            cast("dict[str, Union[str, int, list[str], None]]", config)
+        )
 
     def test_validate_required_config_missing_max_complexity(self) -> None:
         """Test validate_required_config with missing max_complexity."""
@@ -42,7 +44,9 @@ class TestCliHelpers:
 
         # Act & Assert
         with pytest.raises(SystemExit) as exc_info:
-            validate_required_config(config)
+            validate_required_config(
+                cast("dict[str, Union[str, int, list[str], None]]", config)
+            )
 
         assert exc_info.value.code == 1, (
             f"Expected SystemExit with code 1, got {exc_info.value.code}"

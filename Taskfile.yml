@@ -16,6 +16,7 @@ tasks:
     cmds:
       - uv run ruff check
       - uv run mypy src/
+      - uv run mypy tests/
   
   format:
     desc: Format code
@@ -38,16 +39,18 @@ tasks:
       - uv run cccy show-summary src/
   
   complexity-check:
-    desc: "Check complexity thresholds (max cyclomatic: 10)"
+    desc: "Check complexity thresholds"
     cmds:
-      - uv run cccy check --max-complexity 10 src/
+      - uv run cccy check --max-complexity 8 --max-cognitive 8 src/
+      - uv run cccy check --max-complexity 6 --max-cognitive 6 tests/ --exclude "tests/fixtures/*"
   
   check:
     desc: Run all checks (complexity, linting, formatting)
     cmds:
-      - task: complexity-check
       - task: lint
       - task: format-check
+      - task: test
+      - task: complexity-check
   
   build:
     desc: Build package

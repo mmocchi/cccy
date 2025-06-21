@@ -144,7 +144,7 @@ class TestComplexityAnalyzer:
 
         # Act
         result = analyzer.analyze_file(fixture_path)
-        results = [result]
+        results = [result] if result is not None else []
         should_fail = analyzer.should_fail(results)
 
         # Assert

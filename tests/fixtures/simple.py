@@ -15,7 +15,7 @@ def function_with_if(x: int) -> str:
 
 def complex_function(a: int, b: int, c: int) -> float:
     """Function with higher complexity."""
-    result = 0
+    result = 0.0
 
     if a > 0:
         result = (a + b + c if c > 0 else a + b) if b > 0 else a
@@ -33,17 +33,17 @@ def complex_function(a: int, b: int, c: int) -> float:
     try:
         result = result / a
     except ZeroDivisionError:
-        result = 0
+        result = 0.0
 
     return result
 
 
 async def async_function() -> str:
     """An async function."""
-    return await some_async_operation()
+    return await some_async_operation_async()
 
 
-def some_async_operation() -> str:
+async def some_async_operation_async() -> str:
     """Mock async operation."""
     return "async_result"
 

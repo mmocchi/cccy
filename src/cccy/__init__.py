@@ -1,9 +1,5 @@
 """Python complexity measurement tool."""
 
-__version__ = "0.1.0"
-__author__ = "cccy"
-__email__ = "cccy@example.com"
-
 from .analyzer import ComplexityAnalyzer
 from .complexity_calculators import (
     CognitiveComplexityCalculator,

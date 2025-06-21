@@ -117,6 +117,7 @@ jobs:
           
           See the [commit history](https://github.com/${{ github.repository }}/compare/v${{ steps.get_version.outputs.version }}) for detailed changes.
           EOF
-          )"
+          )" \
+            dist/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

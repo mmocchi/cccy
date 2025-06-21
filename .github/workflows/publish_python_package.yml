@@ -19,11 +19,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: python-package-distributions
-          path: dist/
+      - name: Download release assets
+        run: |
+          gh release download ${{ github.ref_name }} --pattern "*.whl" --pattern "*.tar.gz" --dir dist/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

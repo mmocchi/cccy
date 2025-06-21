@@ -122,7 +122,7 @@ curl https://mise.run | sh
 
 ```bash
 # Clone the repository
-git clone https://github.com/example/pycomplex.git
+git clone https://github.com/mmocchi/pycomplex.git
 cd pycomplex
 
 # Install tools (Python, uv, task)
@@ -204,13 +204,53 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: example/pycomplex@v1
+      - uses: mmocchi/pycomplex@v1
         with:
-          path: src/
+          command: check
+          paths: src/
           max-complexity: 10
-          format: json
-          summary: true
+          max-cognitive: 7
 ```
+
+### Advanced Usage Examples
+
+```yaml
+# Show detailed complexity list with JSON output
+- uses: mmocchi/pycomplex@v1
+  with:
+    command: show-list
+    paths: src/ tests/
+    format: json
+    exclude: "*/migrations/*,*/test_*.py"
+    verbose: true
+
+# Show function-level complexity
+- uses: mmocchi/pycomplex@v1
+  with:
+    command: show-functions
+    paths: src/
+    format: csv
+    include: "*.py"
+
+# Show summary statistics only
+- uses: mmocchi/pycomplex@v1
+  with:
+    command: show-summary
+    paths: src/
+    verbose: true
+```
+
+### Available Inputs
+
+- `command`: Command to run (`check`, `show-list`, `show-functions`, `show-summary`) - default: `check`
+- `paths`: Paths to analyze (space-separated) - default: `.`
+- `format`: Output format (`table`, `json`, `csv`, `detailed`) - for show-list/show-functions only
+- `max-complexity`: Maximum cyclomatic complexity - for check command
+- `max-cognitive`: Maximum cognitive complexity - for check command
+- `recursive`: Recursively analyze directories (`true`/`false`) - default: `true`
+- `exclude`: Exclude patterns (comma-separated glob patterns)
+- `include`: Include patterns (comma-separated glob patterns)
+- `verbose`: Enable verbose output (`true`/`false`) - default: `false`
 
 ## Pre-commit Integration
 
@@ -218,7 +258,7 @@ Add to your `.pre-commit-config.yaml`:
 
 ```yaml
 repos:
-  - repo: https://github.com/example/pycomplex
+  - repo: https://github.com/mmocchi/pycomplex
     rev: v1.0.0
     hooks:
       - id: pycomplex

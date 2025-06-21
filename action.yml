@@ -3,26 +3,36 @@ description: 'Analyze Python code complexity with pycomplex'
 author: 'pycomplex'
 
 inputs:
-  path:
-    description: 'Path to analyze (file or directory)'
-    required: true
+  command:
+    description: 'Command to run (check, show-list, show-functions, show-summary)'
+    required: false
+    default: 'check'
+  paths:
+    description: 'Paths to analyze (space-separated)'
+    required: false
     default: '.'
   format:
-    description: 'Output format (table, json, csv, detailed)'
+    description: 'Output format (table, json, csv, detailed) - for show-list/show-functions only'
     required: false
     default: 'table'
   max-complexity:
-    description: 'Maximum allowed cyclomatic complexity'
+    description: 'Maximum allowed cyclomatic complexity - for check command'
+    required: false
+  max-cognitive:
+    description: 'Maximum allowed cognitive complexity - for check command'
     required: false
   recursive:
-    description: 'Recursively analyze directories'
+    description: 'Recursively analyze directories (true/false)'
     required: false
     default: 'true'
   exclude:
-    description: 'Exclude patterns (comma-separated)'
+    description: 'Exclude patterns (comma-separated glob patterns)'
     required: false
-  summary:
-    description: 'Show summary statistics'
+  include:
+    description: 'Include patterns (comma-separated glob patterns)'
+    required: false
+  verbose:
+    description: 'Enable verbose output (true/false)'
     required: false
     default: 'false'
 
@@ -37,6 +47,11 @@ runs:
       uses: astral-sh/setup-uv@v2
       with:
         version: "latest"
+        enable-cache: true
+    
+    - name: Install Python
+      shell: bash
+      run: uv python install
     
     - name: Install pycomplex
       shell: bash
@@ -45,20 +60,36 @@ runs:
     - name: Run complexity analysis
       shell: bash
       run: |
-        args=("${{ inputs.path }}")
+        cmd="${{ inputs.command }}"
+        args=("$cmd")
         
-        if [ "${{ inputs.format }}" != "table" ]; then
+        # Add paths if provided
+        if [ -n "${{ inputs.paths }}" ] && [ "${{ inputs.paths }}" != "." ]; then
+          IFS=' ' read -ra PATH_ARRAY <<< "${{ inputs.paths }}"
+          args+=("${PATH_ARRAY[@]}")
+        fi
+        
+        # Add format option for show-list and show-functions
+        if [[ "$cmd" == "show-list" || "$cmd" == "show-functions" ]] && [ "${{ inputs.format }}" != "table" ]; then
           args+=("--format" "${{ inputs.format }}")
         fi
         
-        if [ -n "${{ inputs.max-complexity }}" ]; then
-          args+=("--max-complexity" "${{ inputs.max-complexity }}")
+        # Add complexity thresholds for check command
+        if [ "$cmd" == "check" ]; then
+          if [ -n "${{ inputs.max-complexity }}" ]; then
+            args+=("--max-complexity" "${{ inputs.max-complexity }}")
+          fi
+          if [ -n "${{ inputs.max-cognitive }}" ]; then
+            args+=("--max-cognitive" "${{ inputs.max-cognitive }}")
+          fi
         fi
         
+        # Add recursive option
         if [ "${{ inputs.recursive }}" == "false" ]; then
           args+=("--no-recursive")
         fi
         
+        # Add exclude patterns
         if [ -n "${{ inputs.exclude }}" ]; then
           IFS=',' read -ra EXCLUDE_PATTERNS <<< "${{ inputs.exclude }}"
           for pattern in "${EXCLUDE_PATTERNS[@]}"; do
@@ -66,8 +97,17 @@ runs:
           done
         fi
         
-        if [ "${{ inputs.summary }}" == "true" ]; then
-          args+=("--summary")
+        # Add include patterns
+        if [ -n "${{ inputs.include }}" ]; then
+          IFS=',' read -ra INCLUDE_PATTERNS <<< "${{ inputs.include }}"
+          for pattern in "${INCLUDE_PATTERNS[@]}"; do
+            args+=("--include" "$pattern")
+          done
+        fi
+        
+        # Add verbose flag
+        if [ "${{ inputs.verbose }}" == "true" ]; then
+          args+=("--verbose")
         fi
         
         uv tool run pycomplex "${args[@]}"

@@ -2,7 +2,8 @@
 
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from typing import Any
+from unittest.mock import MagicMock, patch
 
 from pycomplex.analyzer import ComplexityAnalyzer
 from pycomplex.services import AnalyzerService
@@ -11,7 +12,7 @@ from pycomplex.services import AnalyzerService
 class TestAnalyzerService:
     """Test cases for AnalysisService."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test service initialization."""
         analyzer = ComplexityAnalyzer(max_complexity=10)
         service = AnalyzerService(analyzer)
@@ -20,7 +21,7 @@ class TestAnalyzerService:
             f"Expected analyzer to be stored in service, got {service.analyzer}"
         )
 
-    def test_analyze_paths_single_file(self):
+    def test_analyze_paths_single_file(self) -> None:
         """Test analyzing a single file."""
         analyzer = ComplexityAnalyzer()
         service = AnalyzerService(analyzer)
@@ -33,7 +34,7 @@ class TestAnalyzerService:
             f"Expected 'simple.py' in results, got: {[r.file_path for r in results]}"
         )
 
-    def test_analyze_paths_directory(self):
+    def test_analyze_paths_directory(self) -> None:
         """Test analyzing a directory."""
         analyzer = ComplexityAnalyzer()
         service = AnalyzerService(analyzer)
@@ -44,7 +45,7 @@ class TestAnalyzerService:
         assert len(results) >= 1
         assert any("simple.py" in result.file_path for result in results)
 
-    def test_analyze_paths_nonexistent(self):
+    def test_analyze_paths_nonexistent(self) -> None:
         """Test analyzing nonexistent path."""
         analyzer = ComplexityAnalyzer()
         service = AnalyzerService(analyzer)
@@ -53,7 +54,7 @@ class TestAnalyzerService:
 
         assert len(results) == 0
 
-    def test_analyze_paths_with_exclude(self):
+    def test_analyze_paths_with_exclude(self) -> None:
         """Test analyzing with exclude patterns."""
         analyzer = ComplexityAnalyzer()
         service = AnalyzerService(analyzer)
@@ -74,7 +75,7 @@ class TestAnalyzerService:
             assert "include.py" in results[0].file_path
             assert not any("exclude.py" in result.file_path for result in results)
 
-    def test_analyze_paths_with_include(self):
+    def test_analyze_paths_with_include(self) -> None:
         """Test analyzing with include patterns."""
         analyzer = ComplexityAnalyzer()
         service = AnalyzerService(analyzer)
@@ -94,7 +95,7 @@ class TestAnalyzerService:
             assert len(results) == 1
             assert "target.py" in results[0].file_path
 
-    def test_analyze_paths_verbose(self, capsys):
+    def test_analyze_paths_verbose(self, capsys: Any) -> None:
         """Test analyzing with verbose output."""
         analyzer = ComplexityAnalyzer()
         service = AnalyzerService(analyzer)
@@ -108,7 +109,7 @@ class TestAnalyzerService:
         assert "Analyzing:" in captured.err
 
     @patch("pycomplex.services.Path.exists")
-    def test_handle_permission_error(self, mock_exists, capsys):
+    def test_handle_permission_error(self, mock_exists: MagicMock, capsys: Any) -> None:
         """Test handling permission errors."""
         mock_exists.return_value = True
 
@@ -126,7 +127,7 @@ class TestAnalyzerService:
             assert "Error: Permission denied" in captured.err
 
     @patch("pycomplex.services.Path.exists")
-    def test_handle_general_error(self, mock_exists, capsys):
+    def test_handle_general_error(self, mock_exists: MagicMock, capsys: Any) -> None:
         """Test handling general errors."""
         mock_exists.return_value = True
 
@@ -143,9 +144,9 @@ class TestAnalyzerService:
             captured = capsys.readouterr()
             assert "Error analyzing" in captured.err
 
-    def test_filter_failed_results(self):
+    def test_filter_failed_results(self) -> None:
         """Test filtering results that exceed thresholds."""
-        from pycomplex.analyzer import ComplexityResult, FileComplexityResult
+        from pycomplex.models import ComplexityResult, FileComplexityResult
 
         # Create sample results
         low_complexity_func = ComplexityResult(
@@ -201,9 +202,9 @@ class TestAnalyzerService:
         failed_results = service.filter_failed_results(all_results, 20, 15)
         assert len(failed_results) == 0
 
-    def test_filter_failed_results_cognitive_only(self):
+    def test_filter_failed_results_cognitive_only(self) -> None:
         """Test filtering with cognitive complexity threshold only."""
-        from pycomplex.analyzer import ComplexityResult, FileComplexityResult
+        from pycomplex.models import ComplexityResult, FileComplexityResult
 
         # Create result that fails cognitive but not cyclomatic
         func = ComplexityResult(

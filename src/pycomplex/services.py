@@ -6,7 +6,8 @@ from typing import List, Optional
 
 import click
 
-from .analyzer import ComplexityAnalyzer, FileComplexityResult
+from .analyzer import ComplexityAnalyzer
+from .models import FileComplexityResult
 
 logger = logging.getLogger(__name__)
 

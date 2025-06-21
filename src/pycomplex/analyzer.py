@@ -2,79 +2,13 @@
 
 import ast
 from pathlib import Path
-from typing import List, NamedTuple, Optional, Union
+from typing import List, Optional, Union
 
 from .complexity_calculators import (
     CognitiveComplexityCalculator,
     CyclomaticComplexityCalculator,
 )
-
-
-class ComplexityResult(NamedTuple):
-    """Result of complexity analysis for a single function or method."""
-
-    name: str
-    cyclomatic_complexity: int
-    cognitive_complexity: int
-    lineno: int
-    col_offset: int
-    end_lineno: Optional[int] = None
-    end_col_offset: Optional[int] = None
-
-
-class FileComplexityResult(NamedTuple):
-    """Result of complexity analysis for a single file."""
-
-    file_path: str
-    functions: List[ComplexityResult]
-    total_cyclomatic: int
-    total_cognitive: int
-    max_cyclomatic: int
-    max_cognitive: int
-
-    def get_status(self, thresholds: Optional[dict] = None) -> str:
-        """Return status based on complexity thresholds.
-
-        Args:
-            thresholds: Optional custom thresholds dict with structure:
-                       {
-                           "medium": {"cyclomatic": 5, "cognitive": 4},
-                           "high": {"cyclomatic": 10, "cognitive": 7}
-                       }
-
-        Returns:
-            Status string: "OK", "MEDIUM", or "HIGH"
-
-        """
-        # Use default thresholds if none provided
-        if thresholds is None:
-            thresholds = {
-                "medium": {"cyclomatic": 5, "cognitive": 4},
-                "high": {"cyclomatic": 10, "cognitive": 7},
-            }
-
-        high_cyclomatic = thresholds["high"]["cyclomatic"]
-        high_cognitive = thresholds["high"]["cognitive"]
-        medium_cyclomatic = thresholds["medium"]["cyclomatic"]
-        medium_cognitive = thresholds["medium"]["cognitive"]
-
-        if self.max_cyclomatic > high_cyclomatic or self.max_cognitive > high_cognitive:
-            return "HIGH"
-        if (
-            self.max_cyclomatic > medium_cyclomatic
-            or self.max_cognitive > medium_cognitive
-        ):
-            return "MEDIUM"
-        return "OK"
-
-    @property
-    def status(self) -> str:
-        """Return status based on default complexity thresholds.
-
-        This property is kept for backward compatibility.
-        For configurable thresholds, use get_status() method.
-        """
-        return self.get_status()
+from .models import ComplexityResult, FileComplexityResult
 
 
 class ComplexityAnalyzer:

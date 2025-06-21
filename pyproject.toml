@@ -30,6 +30,8 @@ dependencies = [
     "click>=8.0.0",
     "tabulate>=0.9.0",
     "tomli>=1.2.0;python_version<'3.11'",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
 ]
 
 [project.scripts]
@@ -118,8 +120,6 @@ ignore = [
 # Test-specific rule overrides
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = [
-    "ANN001",  # missing type annotation for function argument
-    "ANN201",  # missing return type annotation for public function
     "D401",    # first line should be in imperative mood
     "PLR2004", # magic value comparison
     "S101",    # assert usage (normal in tests)
@@ -159,6 +159,13 @@ module = [
     "cognitive_complexity.*",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+disallow_untyped_decorators = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

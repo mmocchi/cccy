@@ -1,15 +1,16 @@
 """Tests for the output formatters module."""
 
 import json
+from typing import List
 
 import pytest
 
-from pycomplex.analyzer import ComplexityResult, FileComplexityResult
 from pycomplex.formatters import OutputFormatter
+from pycomplex.models import ComplexityResult, FileComplexityResult
 
 
 @pytest.fixture
-def sample_results():
+def sample_results() -> List[FileComplexityResult]:
     """Create sample complexity results for testing."""
     function1 = ComplexityResult(
         name="simple_func",
@@ -51,7 +52,7 @@ def sample_results():
 class TestOutputFormatter:
     """Test cases for OutputFormatter."""
 
-    def test_format_table_empty(self):
+    def test_format_table_empty(self) -> None:
         """Test formatting empty results as table."""
         formatter = OutputFormatter()
         result = formatter.format_table([])
@@ -60,7 +61,7 @@ class TestOutputFormatter:
             f"Expected empty message, got: {result}"
         )
 
-    def test_format_table_with_results(self, sample_results):
+    def test_format_table_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as table."""
         formatter = OutputFormatter()
         result = formatter.format_table(sample_results)
@@ -76,14 +77,14 @@ class TestOutputFormatter:
         assert "OK" in result, "Expected status 'OK' not found in table"
         assert "MEDIUM" in result, "Expected status 'MEDIUM' not found in table"
 
-    def test_format_detailed_table_empty(self):
+    def test_format_detailed_table_empty(self) -> None:
         """Test formatting empty results as detailed table."""
         formatter = OutputFormatter()
         result = formatter.format_detailed_table([])
 
         assert result == "No Python files analyzed."
 
-    def test_format_detailed_table_with_results(self, sample_results):
+    def test_format_detailed_table_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as detailed table."""
         formatter = OutputFormatter()
         result = formatter.format_detailed_table(sample_results)
@@ -96,7 +97,7 @@ class TestOutputFormatter:
         assert "Line" in result
         assert "File totals" in result
 
-    def test_format_detailed_table_no_functions(self):
+    def test_format_detailed_table_no_functions(self) -> None:
         """Test formatting file with no functions as detailed table."""
         result_no_funcs = FileComplexityResult(
             file_path="empty.py",
@@ -113,7 +114,7 @@ class TestOutputFormatter:
         assert "empty.py" in result
         assert "No functions found." in result
 
-    def test_format_json_empty(self):
+    def test_format_json_empty(self) -> None:
         """Test formatting empty results as JSON."""
         formatter = OutputFormatter()
         result = formatter.format_json([])
@@ -121,7 +122,7 @@ class TestOutputFormatter:
         parsed = json.loads(result)
         assert parsed == []
 
-    def test_format_json_with_results(self, sample_results):
+    def test_format_json_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as JSON."""
         formatter = OutputFormatter()
         result = formatter.format_json(sample_results)
@@ -160,7 +161,7 @@ class TestOutputFormatter:
             f"Expected cognitive complexity 0, got {first_function['cognitive_complexity']}"
         )
 
-    def test_format_csv_empty(self):
+    def test_format_csv_empty(self) -> None:
         """Test formatting empty results as CSV."""
         formatter = OutputFormatter()
         result = formatter.format_csv([])
@@ -171,7 +172,7 @@ class TestOutputFormatter:
         assert "file_path" in lines[0]
         assert "function_name" in lines[0]
 
-    def test_format_csv_with_results(self, sample_results):
+    def test_format_csv_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as CSV."""
         formatter = OutputFormatter()
         result = formatter.format_csv(sample_results)
@@ -193,7 +194,7 @@ class TestOutputFormatter:
         assert "complex.py" in lines[2]
         assert "complex_func" in lines[2]
 
-    def test_format_csv_no_functions(self):
+    def test_format_csv_no_functions(self) -> None:
         """Test formatting file with no functions as CSV."""
         result_no_funcs = FileComplexityResult(
             file_path="empty.py",
@@ -216,14 +217,14 @@ class TestOutputFormatter:
         values = lines[1].split(",")
         assert values[1] == ""  # empty function name
 
-    def test_format_summary_empty(self):
+    def test_format_summary_empty(self) -> None:
         """Test formatting empty results as summary."""
         formatter = OutputFormatter()
         result = formatter.format_summary([])
 
         assert result == "No Python files analyzed."
 
-    def test_format_summary_with_results(self, sample_results):
+    def test_format_summary_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as summary."""
         formatter = OutputFormatter()
         result = formatter.format_summary(sample_results)
@@ -235,7 +236,7 @@ class TestOutputFormatter:
         assert "MEDIUM: 1" in result
         assert "HIGH: 0" in result
 
-    def test_format_summary_with_high_complexity(self):
+    def test_format_summary_with_high_complexity(self) -> None:
         """Test formatting summary with high complexity files."""
         high_complexity_func = ComplexityResult(
             name="very_complex_func",
@@ -263,7 +264,7 @@ class TestOutputFormatter:
         assert "max cyclomatic: 15" in result
         assert "max cognitive: 12" in result
 
-    def test_format_functions_json_empty(self):
+    def test_format_functions_json_empty(self) -> None:
         """Test formatting empty results as functions JSON."""
         formatter = OutputFormatter()
         result = formatter.format_functions_json([])
@@ -271,7 +272,7 @@ class TestOutputFormatter:
         parsed = json.loads(result)
         assert parsed == []
 
-    def test_format_functions_json_with_results(self, sample_results):
+    def test_format_functions_json_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as functions JSON."""
         formatter = OutputFormatter()
         result = formatter.format_functions_json(sample_results)
@@ -325,7 +326,7 @@ class TestOutputFormatter:
             f"Expected file status 'MEDIUM', got {second_func['file_status']}"
         )
 
-    def test_format_functions_json_no_functions(self):
+    def test_format_functions_json_no_functions(self) -> None:
         """Test formatting file with no functions as functions JSON."""
         result_no_funcs = FileComplexityResult(
             file_path="empty.py",
@@ -342,7 +343,7 @@ class TestOutputFormatter:
         parsed = json.loads(result)
         assert parsed == []  # No functions means empty array
 
-    def test_format_functions_csv_empty(self):
+    def test_format_functions_csv_empty(self) -> None:
         """Test formatting empty results as functions CSV."""
         formatter = OutputFormatter()
         result = formatter.format_functions_csv([])
@@ -357,7 +358,7 @@ class TestOutputFormatter:
         assert "cyclomatic_complexity" in header
         assert "cognitive_complexity" in header
 
-    def test_format_functions_csv_with_results(self, sample_results):
+    def test_format_functions_csv_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as functions CSV."""
         formatter = OutputFormatter()
         result = formatter.format_functions_csv(sample_results)
@@ -389,7 +390,7 @@ class TestOutputFormatter:
         assert "8" in second_row[4]  # cyclomatic complexity
         assert "5" in second_row[5]  # cognitive complexity
 
-    def test_format_functions_csv_no_functions(self):
+    def test_format_functions_csv_no_functions(self) -> None:
         """Test formatting file with no functions as functions CSV."""
         result_no_funcs = FileComplexityResult(
             file_path="empty.py",
@@ -409,7 +410,7 @@ class TestOutputFormatter:
         assert len(lines) == 1
         assert "file_path" in lines[0]
 
-    def test_format_functions_csv_multiple_functions_per_file(self):
+    def test_format_functions_csv_multiple_functions_per_file(self) -> None:
         """Test formatting file with multiple functions as functions CSV."""
         function1 = ComplexityResult(
             name="func1",

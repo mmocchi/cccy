@@ -9,7 +9,7 @@ from pycomplex.config import PyComplexConfig
 class TestPyComplexConfig:
     """Test cases for ConfigManager."""
 
-    def test_init_without_config_file(self):
+    def test_init_without_config_file(self) -> None:
         """Test initialization without config file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_manager = PyComplexConfig(Path(tmpdir) / "nonexistent.toml")
@@ -28,7 +28,7 @@ class TestPyComplexConfig:
                 f"Expected empty include patterns, got {config_manager.get_include_patterns()}"
             )
 
-    def test_init_with_config_file(self):
+    def test_init_with_config_file(self) -> None:
         """Test initialization with config file."""
         config_content = """
 [tool.pycomplex]
@@ -54,7 +54,7 @@ paths = ["src/", "lib/"]
             assert config_manager.get_include_patterns() == ["*.py"]
             assert config_manager.get_default_paths() == ["src/", "lib/"]
 
-    def test_get_status_thresholds_default(self):
+    def test_get_status_thresholds_default(self) -> None:
         """Test getting default status thresholds."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_manager = PyComplexConfig(Path(tmpdir) / "nonexistent.toml")
@@ -67,7 +67,7 @@ paths = ["src/", "lib/"]
             }
             assert thresholds == expected
 
-    def test_get_status_thresholds_custom(self):
+    def test_get_status_thresholds_custom(self) -> None:
         """Test getting custom status thresholds."""
         config_content = """
 [tool.pycomplex]
@@ -87,7 +87,7 @@ status-thresholds = { medium = { cyclomatic = 3, cognitive = 2 }, high = { cyclo
             }
             assert thresholds == expected
 
-    def test_merge_with_cli_options_all_none(self):
+    def test_merge_with_cli_options_all_none(self) -> None:
         """Test merging when all CLI options are None."""
         config_content = """
 [tool.pycomplex]
@@ -104,16 +104,16 @@ paths = ["src/"]
             merged = config_manager.merge_with_cli_options(
                 max_complexity=None,
                 max_cognitive=None,
-                exclude=(),
-                include=(),
-                paths=(),
+                exclude=None,
+                include=None,
+                paths=None,
             )
 
             assert merged["max_complexity"] == 8
             assert merged["exclude"] == ["*/tests/*"]
             assert merged["paths"] == ["src/"]
 
-    def test_merge_with_cli_options_cli_override(self):
+    def test_merge_with_cli_options_cli_override(self) -> None:
         """Test CLI options overriding config file values."""
         config_content = """
 [tool.pycomplex]
@@ -129,16 +129,16 @@ exclude = ["*/tests/*"]
             merged = config_manager.merge_with_cli_options(
                 max_complexity=12,
                 max_cognitive=None,
-                exclude=("*/migrations/*",),
-                include=(),
-                paths=("lib/",),
+                exclude=["*/migrations/*"],
+                include=None,
+                paths=["lib/"],
             )
 
             assert merged["max_complexity"] == 12  # CLI override
             assert merged["exclude"] == ["*/migrations/*"]  # CLI override
             assert merged["paths"] == ["lib/"]  # CLI override
 
-    def test_config_with_partial_status_thresholds(self):
+    def test_config_with_partial_status_thresholds(self) -> None:
         """Test config with only partial status threshold definitions."""
         config_content = """
 [tool.pycomplex]
@@ -162,7 +162,7 @@ status-thresholds = { medium = { cyclomatic = 3 } }
             }
             assert thresholds == expected
 
-    def test_config_file_found_directly(self):
+    def test_config_file_found_directly(self) -> None:
         """Test finding config file when specified directly."""
         config_content = """
 [tool.pycomplex]
@@ -177,7 +177,7 @@ max-complexity = 15
             config_manager = PyComplexConfig(Path(f.name))
             assert config_manager.get_max_complexity() == 15
 
-    def test_invalid_toml_file(self):
+    def test_invalid_toml_file(self) -> None:
         """Test handling invalid TOML file."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
             f.write("invalid toml content [[[")
@@ -187,7 +187,7 @@ max-complexity = 15
             config_manager = PyComplexConfig(Path(f.name))
             assert config_manager.get_max_complexity() is None
 
-    def test_get_default_paths_with_current_dir(self):
+    def test_get_default_paths_with_current_dir(self) -> None:
         """Test getting default paths when none specified in config."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_manager = PyComplexConfig(Path(tmpdir) / "nonexistent.toml")

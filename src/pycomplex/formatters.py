@@ -7,7 +7,7 @@ from typing import List
 
 from tabulate import tabulate
 
-from .analyzer import FileComplexityResult
+from .models import FileComplexityResult
 
 
 class OutputFormatter:
@@ -88,7 +88,7 @@ class OutputFormatter:
 
     @staticmethod
     def format_json(results: List[FileComplexityResult]) -> str:
-        """Format results as JSON.
+        """Format results as JSON using Pydantic model serialization.
 
         Args:
             results: List of file complexity results
@@ -97,38 +97,42 @@ class OutputFormatter:
             JSON formatted string
 
         """
+        # Use Pydantic's model_dump and transform for legacy format compatibility
         data = []
-
         for result in results:
+            result_dict = result.model_dump()
+
+            # Transform functions to legacy format
             functions = []
-            for func in result.functions:
+            for func in result_dict["functions"]:
                 functions.append(
                     {
-                        "name": func.name,
-                        "line": func.lineno,
-                        "cyclomatic_complexity": func.cyclomatic_complexity,
-                        "cognitive_complexity": func.cognitive_complexity,
-                        "end_line": func.end_lineno,
+                        "name": func["name"],
+                        "line": func[
+                            "lineno"
+                        ],  # Map lineno to line for backward compatibility
+                        "cyclomatic_complexity": func["cyclomatic_complexity"],
+                        "cognitive_complexity": func["cognitive_complexity"],
+                        "end_line": func["end_lineno"],
                     }
                 )
 
-            data.append(
-                {
-                    "file_path": result.file_path,
-                    "functions": functions,
-                    "totals": {
-                        "cyclomatic_complexity": result.total_cyclomatic,
-                        "cognitive_complexity": result.total_cognitive,
-                    },
-                    "max_complexity": {
-                        "cyclomatic": result.max_cyclomatic,
-                        "cognitive": result.max_cognitive,
-                    },
-                    "status": result.status,
-                }
-            )
-
-        return json.dumps(data, indent=2)
+            # Transform to legacy format for backward compatibility
+            transformed = {
+                "file_path": result_dict["file_path"],
+                "functions": functions,
+                "totals": {
+                    "cyclomatic_complexity": result_dict["total_cyclomatic"],
+                    "cognitive_complexity": result_dict["total_cognitive"],
+                },
+                "max_complexity": {
+                    "cyclomatic": result_dict["max_cyclomatic"],
+                    "cognitive": result_dict["max_cognitive"],
+                },
+                "status": result.status,  # Use property for status
+            }
+            data.append(transformed)
+        return json.dumps(data, indent=2, default=str)
 
     @staticmethod
     def format_csv(results: List[FileComplexityResult]) -> str:
@@ -218,7 +222,7 @@ class OutputFormatter:
                     }
                 )
 
-        return json.dumps(data, indent=2)
+        return json.dumps(data, indent=2, default=str)
 
     @staticmethod
     def format_functions_csv(results: List[FileComplexityResult]) -> str:

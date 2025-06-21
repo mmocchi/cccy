@@ -3,6 +3,10 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from pydantic import ValidationError
+
+from .models import PyComplexSettings
+
 try:
     import tomllib  # type: ignore[import-not-found]
 except ImportError:
@@ -24,7 +28,7 @@ class PyComplexConfig:
 
         """
         self.config_path = config_path or self._find_config_file()
-        self._config_data: Optional[Dict[str, Any]] = None
+        self._settings: Optional[PyComplexSettings] = None
 
     def _find_config_file(self) -> Optional[Path]:
         """Find pyproject.toml file in current directory or parent directories."""
@@ -40,121 +44,56 @@ class PyComplexConfig:
 
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration from pyproject.toml file."""
-        if self._config_data is not None:
-            return self._config_data
-
         if not self.config_path or not self.config_path.exists():
-            self._config_data = {}
-            return self._config_data
+            return {}
 
         if tomllib is None:
             # No TOML parser available, return empty config
-            self._config_data = {}
-            return self._config_data
+            return {}
 
         try:
             with self.config_path.open("rb") as f:
                 config_data = tomllib.load(f)
-                self._config_data = config_data.get("tool", {}).get("pycomplex", {})
+                pycomplex_config: Dict[str, Any] = config_data.get("tool", {}).get("pycomplex", {})
+                return pycomplex_config
         except Exception:
             # If parsing fails, use empty config
-            self._config_data = {}
+            return {}
 
-        return self._config_data
+    def _get_settings(self) -> PyComplexSettings:
+        """Get Pydantic settings instance."""
+        if self._settings is None:
+            config_data = self._load_config()
+            try:
+                self._settings = PyComplexSettings.from_toml_config(config_data)
+            except ValidationError as e:
+                # Convert validation error to user-friendly message
+                raise ValueError(f"Configuration error in pyproject.toml: {e}") from e
+        return self._settings
 
     def get_max_complexity(self) -> Optional[int]:
         """Get maximum cyclomatic complexity threshold."""
-        config = self._load_config()
-        return config.get("max-complexity")
+        return self._get_settings().max_complexity
 
     def get_max_cognitive(self) -> Optional[int]:
         """Get maximum cognitive complexity threshold."""
-        config = self._load_config()
-        return config.get("max-cognitive")
+        return self._get_settings().max_cognitive
 
     def get_exclude_patterns(self) -> List[str]:
         """Get file patterns to exclude."""
-        config = self._load_config()
-        patterns = config.get("exclude", [])
-        return list(patterns) if patterns else []
+        return self._get_settings().exclude
 
     def get_include_patterns(self) -> List[str]:
         """Get file patterns to include."""
-        config = self._load_config()
-        patterns = config.get("include", [])
-        return list(patterns) if patterns else []
+        return self._get_settings().include
 
     def get_default_paths(self) -> List[str]:
         """Get default paths to analyze."""
-        config = self._load_config()
-        paths = config.get("paths", [])
-
-        # If no paths configured, use current directory
-        if not paths:
-            return ["."]
-
-        return list(paths) if paths else ["."]
+        return self._get_settings().paths
 
     def get_status_thresholds(self) -> Dict[str, Dict[str, int]]:
         """Get status classification thresholds."""
-        config = self._load_config()
-        default_thresholds = self._get_default_thresholds()
-        configured_thresholds = config.get("status-thresholds", {})
-
-        return self._merge_thresholds(default_thresholds, configured_thresholds)
-
-    def _get_default_thresholds(self) -> Dict[str, Dict[str, int]]:
-        """Get the default status thresholds.
-
-        Returns:
-            Default threshold configuration
-
-        """
-        return {
-            "medium": {
-                "cyclomatic": 5,
-                "cognitive": 4,
-            },
-            "high": {
-                "cyclomatic": 10,
-                "cognitive": 7,
-            },
-        }
-
-    def _merge_thresholds(
-        self, defaults: Dict[str, Dict[str, int]], overrides: Dict[str, Any]
-    ) -> Dict[str, Dict[str, int]]:
-        """Merge default thresholds with configuration overrides.
-
-        Args:
-            defaults: Default threshold values
-            overrides: Configuration override values
-
-        Returns:
-            Merged threshold configuration
-
-        """
-        result = defaults.copy()
-
-        for level in ["medium", "high"]:
-            if level in overrides:
-                self._update_threshold_level(result[level], overrides[level])
-
-        return result
-
-    def _update_threshold_level(
-        self, default_level: Dict[str, int], override_level: Dict[str, Any]
-    ) -> None:
-        """Update a specific threshold level with overrides.
-
-        Args:
-            default_level: Default values for this level (modified in place)
-            override_level: Override values for this level
-
-        """
-        for metric in ["cyclomatic", "cognitive"]:
-            if metric in override_level:
-                default_level[metric] = override_level[metric]
+        return self._get_settings().status_thresholds
 
     def merge_with_cli_options(
         self,
@@ -165,10 +104,11 @@ class PyComplexConfig:
         paths: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """Merge configuration with CLI options, CLI takes precedence."""
+        settings = self._get_settings()
         return {
-            "max_complexity": max_complexity or self.get_max_complexity(),
-            "max_cognitive": max_cognitive or self.get_max_cognitive(),
-            "exclude": list(exclude) if exclude else self.get_exclude_patterns(),
-            "include": list(include) if include else self.get_include_patterns(),
-            "paths": list(paths) if paths else self.get_default_paths(),
+            "max_complexity": max_complexity or settings.max_complexity,
+            "max_cognitive": max_cognitive or settings.max_cognitive,
+            "exclude": list(exclude) if exclude else settings.exclude,
+            "include": list(include) if include else settings.include,
+            "paths": list(paths) if paths else settings.paths,
         }

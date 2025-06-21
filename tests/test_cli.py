@@ -11,7 +11,7 @@ from pycomplex.cli import main
 class TestCLI:
     """Test cases for the CLI interface."""
 
-    def test_cli_help(self):
+    def test_cli_help(self) -> None:
         """Test CLI help output."""
         runner = CliRunner()
         result = runner.invoke(main, ["--help"])
@@ -31,7 +31,7 @@ class TestCLI:
             "'show-summary' command not found in help output"
         )
 
-    def test_cli_version(self):
+    def test_cli_version(self) -> None:
         """Test CLI version output."""
         runner = CliRunner()
         result = runner.invoke(main, ["--version"])
@@ -40,7 +40,7 @@ class TestCLI:
             f"CLI version command failed with exit code {result.exit_code}"
         )
 
-    def test_cli_analyze_file(self):
+    def test_cli_analyze_file(self) -> None:
         """Test analyzing a single file."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -61,7 +61,7 @@ class TestCLI:
         )
         assert "Status" in result.output, "'Status' header not found in table output"
 
-    def test_cli_analyze_directory(self):
+    def test_cli_analyze_directory(self) -> None:
         """Test analyzing a directory."""
         runner = CliRunner()
         fixtures_dir = Path(__file__).parent / "fixtures"
@@ -71,7 +71,7 @@ class TestCLI:
         assert result.exit_code == 0
         assert "simple.py" in result.output
 
-    def test_cli_json_format(self):
+    def test_cli_json_format(self) -> None:
         """Test JSON output format."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -90,7 +90,7 @@ class TestCLI:
         assert isinstance(data, list), f"Expected JSON array, got {type(data)}"
         assert len(data) >= 1, f"Expected at least 1 file result, got {len(data)}"
 
-    def test_cli_csv_format(self):
+    def test_cli_csv_format(self) -> None:
         """Test CSV output format."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -106,7 +106,7 @@ class TestCLI:
         assert "file_path" in lines[0]
         assert "function_name" in lines[0]
 
-    def test_cli_detailed_format(self):
+    def test_cli_detailed_format(self) -> None:
         """Test detailed table format."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -121,7 +121,7 @@ class TestCLI:
         assert "Line" in result.output
         assert "File totals" in result.output
 
-    def test_cli_with_max_complexity(self):
+    def test_cli_with_max_complexity(self) -> None:
         """Test CLI with max complexity threshold."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -134,7 +134,7 @@ class TestCLI:
         # Should exit with error code due to complex functions
         assert result.exit_code == 1
 
-    def test_cli_with_high_max_complexity(self):
+    def test_cli_with_high_max_complexity(self) -> None:
         """Test CLI with high max complexity threshold."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -154,7 +154,7 @@ class TestCLI:
 
         assert result.exit_code == 0
 
-    def test_cli_verbose_output(self):
+    def test_cli_verbose_output(self) -> None:
         """Test verbose output."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -165,7 +165,7 @@ class TestCLI:
         # Verbose messages go to stderr
         assert "Analyzing:" in result.stderr or "Analyzing:" in result.output
 
-    def test_cli_summary_output(self):
+    def test_cli_summary_output(self) -> None:
         """Test summary output."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -177,7 +177,7 @@ class TestCLI:
         assert "files" in result.output
         assert "functions" in result.output
 
-    def test_cli_exclude_patterns(self):
+    def test_cli_exclude_patterns(self) -> None:
         """Test exclude patterns."""
         runner = CliRunner()
 
@@ -196,7 +196,7 @@ class TestCLI:
             assert "include.py" in result.output
             assert "exclude.py" not in result.output
 
-    def test_cli_no_recursive(self):
+    def test_cli_no_recursive(self) -> None:
         """Test non-recursive directory analysis."""
         runner = CliRunner()
 
@@ -218,7 +218,7 @@ class TestCLI:
             # Should not include subdirectory files
             assert "sub.py" not in result.output
 
-    def test_cli_nonexistent_file(self):
+    def test_cli_nonexistent_file(self) -> None:
         """Test CLI with nonexistent file."""
         runner = CliRunner()
 
@@ -227,7 +227,7 @@ class TestCLI:
         # Should fail because file doesn't exist
         assert result.exit_code != 0
 
-    def test_cli_multiple_paths(self):
+    def test_cli_multiple_paths(self) -> None:
         """Test CLI with multiple paths."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -243,7 +243,7 @@ class TestCLI:
         simple_py_lines = [line for line in output_lines if "simple.py" in line]
         assert len(simple_py_lines) >= 2
 
-    def test_cli_empty_directory(self):
+    def test_cli_empty_directory(self) -> None:
         """Test CLI with empty directory."""
         runner = CliRunner()
 
@@ -253,7 +253,7 @@ class TestCLI:
             assert result.exit_code == 1
             assert "No Python files found" in result.output
 
-    def test_cli_invalid_format(self):
+    def test_cli_invalid_format(self) -> None:
         """Test CLI with invalid format."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -265,7 +265,7 @@ class TestCLI:
         assert result.exit_code != 0
         assert "Invalid value" in result.output or "Choose from" in result.output
 
-    def test_cli_show_functions_help(self):
+    def test_cli_show_functions_help(self) -> None:
         """Test show-functions help output."""
         runner = CliRunner()
         result = runner.invoke(main, ["show-functions", "--help"])
@@ -280,7 +280,7 @@ class TestCLI:
         assert "json" in result.output, "'json' format option not found in help"
         assert "csv" in result.output, "'csv' format option not found in help"
 
-    def test_cli_show_functions_table(self):
+    def test_cli_show_functions_table(self) -> None:
         """Test show-functions with table format."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -295,7 +295,7 @@ class TestCLI:
         assert "Cognitive" in result.output
         assert "File totals" in result.output
 
-    def test_cli_show_functions_json(self):
+    def test_cli_show_functions_json(self) -> None:
         """Test show-functions with JSON format."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -333,7 +333,7 @@ class TestCLI:
                 "Missing 'cognitive_complexity' in function JSON output"
             )
 
-    def test_cli_show_functions_csv(self):
+    def test_cli_show_functions_csv(self) -> None:
         """Test show-functions with CSV format."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -353,7 +353,7 @@ class TestCLI:
         assert "cyclomatic_complexity" in header
         assert "cognitive_complexity" in header
 
-    def test_cli_show_functions_directory(self):
+    def test_cli_show_functions_directory(self) -> None:
         """Test show-functions with directory."""
         runner = CliRunner()
         fixtures_dir = Path(__file__).parent / "fixtures"
@@ -363,7 +363,7 @@ class TestCLI:
         assert result.exit_code == 0
         assert "simple.py" in result.output
 
-    def test_cli_show_functions_with_options(self):
+    def test_cli_show_functions_with_options(self) -> None:
         """Test show-functions with various options."""
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -374,7 +374,7 @@ class TestCLI:
 
         assert result.exit_code == 0
 
-    def test_cli_show_functions_empty_directory(self):
+    def test_cli_show_functions_empty_directory(self) -> None:
         """Test show-functions with empty directory."""
         runner = CliRunner()
 
@@ -384,7 +384,7 @@ class TestCLI:
             assert result.exit_code == 1
             assert "No Python files found" in result.output
 
-    def test_cli_main_without_subcommand(self):
+    def test_cli_main_without_subcommand(self) -> None:
         """Test main command without subcommand shows help."""
         runner = CliRunner()
         result = runner.invoke(main, [])

@@ -1,20 +1,21 @@
 """Tests for the CLI helpers module."""
 
+from typing import Any
 
 import pytest
 
-from pycomplex.analyzer import ComplexityResult, FileComplexityResult
 from pycomplex.cli_helpers import (
     format_and_display_output,
     validate_required_config,
 )
 from pycomplex.formatters import OutputFormatter
+from pycomplex.models import ComplexityResult, FileComplexityResult
 
 
 class TestCliHelpers:
     """Test cases for CLI helper functions."""
 
-    def test_validate_required_config_valid(self):
+    def test_validate_required_config_valid(self) -> None:
         """Test validate_required_config with valid config."""
         config = {
             "max_complexity": 10,
@@ -27,7 +28,7 @@ class TestCliHelpers:
         # Should not raise any exception
         validate_required_config(config)
 
-    def test_validate_required_config_missing_max_complexity(self):
+    def test_validate_required_config_missing_max_complexity(self) -> None:
         """Test validate_required_config with missing max_complexity."""
         config = {
             "max_complexity": None,
@@ -44,7 +45,7 @@ class TestCliHelpers:
             f"Expected SystemExit with code 1, got {exc_info.value.code}"
         )
 
-    def test_format_and_display_output_table(self, capsys):
+    def test_format_and_display_output_table(self, capsys: Any) -> None:
         """Test format_and_display_output with table format."""
         # Create sample results
         function = ComplexityResult(
@@ -76,7 +77,7 @@ class TestCliHelpers:
             f"Expected 'Cyclomatic' header in table output, got: {captured.out}"
         )
 
-    def test_format_and_display_output_json(self, capsys):
+    def test_format_and_display_output_json(self, capsys: Any) -> None:
         """Test format_and_display_output with JSON format."""
         # Create sample results
         function = ComplexityResult(
@@ -104,7 +105,7 @@ class TestCliHelpers:
         assert "test.py" in captured.out
         assert '"file_path"' in captured.out
 
-    def test_format_and_display_output_csv(self, capsys):
+    def test_format_and_display_output_csv(self, capsys: Any) -> None:
         """Test format_and_display_output with CSV format."""
         # Create sample results
         function = ComplexityResult(
@@ -132,7 +133,7 @@ class TestCliHelpers:
         assert "test.py" in captured.out
         assert "file_path" in captured.out
 
-    def test_format_and_display_output_detailed(self, capsys):
+    def test_format_and_display_output_detailed(self, capsys: Any) -> None:
         """Test format_and_display_output with detailed format."""
         # Create sample results
         function = ComplexityResult(

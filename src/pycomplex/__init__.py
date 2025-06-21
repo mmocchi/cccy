@@ -4,7 +4,7 @@ __version__ = "0.1.0"
 __author__ = "pycomplex"
 __email__ = "pycomplex@example.com"
 
-from .analyzer import ComplexityAnalyzer, ComplexityResult, FileComplexityResult
+from .analyzer import ComplexityAnalyzer
 from .complexity_calculators import (
     CognitiveComplexityCalculator,
     ComplexityCalculator,
@@ -21,6 +21,7 @@ from .exceptions import (
     PyComplexError,
 )
 from .formatters import OutputFormatter
+from .models import ComplexityResult, FileComplexityResult
 from .services import AnalyzerService
 
 __all__ = [

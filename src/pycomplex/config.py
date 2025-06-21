@@ -22,8 +22,8 @@ try:
 except ImportError:
     # Python < 3.11
     try:
-        import tomli  # type: ignore[import-not-found]
-        toml_loader = tomli
+        import tomli
+        toml_loader = tomli  # type: ignore[assignment]
     except ImportError:
         toml_loader = None
 

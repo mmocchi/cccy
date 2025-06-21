@@ -188,7 +188,7 @@ class TestCLI:
 
         # Assert
         assert result.exit_code == 0
-        assert "Analyzing:" in result.stderr or "Analyzing:" in result.output
+        assert "Analyzing:" in result.output
 
     def test_cli_summary_output(self) -> None:
         """Test summary output."""

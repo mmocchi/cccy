@@ -1,7 +1,6 @@
 """Tests for the output formatters module."""
 
 import json
-from typing import List
 
 import pytest
 
@@ -10,7 +9,7 @@ from pycomplex.models import ComplexityResult, FileComplexityResult
 
 
 @pytest.fixture
-def sample_results() -> List[FileComplexityResult]:
+def sample_results() -> list[FileComplexityResult]:
     """Create sample complexity results for testing."""
     function1 = ComplexityResult(
         name="simple_func",
@@ -65,7 +64,9 @@ class TestOutputFormatter:
             f"Expected empty message, got: {result}"
         )
 
-    def test_format_table_with_results(self, sample_results: List[FileComplexityResult]) -> None:
+    def test_format_table_with_results(
+        self, sample_results: list[FileComplexityResult]
+    ) -> None:
         """Test formatting results as table."""
         # Arrange
         formatter = OutputFormatter()
@@ -96,7 +97,9 @@ class TestOutputFormatter:
         # Assert
         assert result == "No Python files analyzed."
 
-    def test_format_detailed_table_with_results(self, sample_results: List[FileComplexityResult]) -> None:
+    def test_format_detailed_table_with_results(
+        self, sample_results: list[FileComplexityResult]
+    ) -> None:
         """Test formatting results as detailed table."""
         # Arrange
         formatter = OutputFormatter()
@@ -145,7 +148,9 @@ class TestOutputFormatter:
         parsed = json.loads(result)
         assert parsed == []
 
-    def test_format_json_with_results(self, sample_results: List[FileComplexityResult]) -> None:
+    def test_format_json_with_results(
+        self, sample_results: list[FileComplexityResult]
+    ) -> None:
         """Test formatting results as JSON."""
         # Arrange
         formatter = OutputFormatter()
@@ -199,7 +204,9 @@ class TestOutputFormatter:
         assert "file_path" in lines[0]
         assert "function_name" in lines[0]
 
-    def test_format_csv_with_results(self, sample_results: List[FileComplexityResult]) -> None:
+    def test_format_csv_with_results(
+        self, sample_results: list[FileComplexityResult]
+    ) -> None:
         """Test formatting results as CSV."""
         # Arrange
         formatter = OutputFormatter()
@@ -253,7 +260,9 @@ class TestOutputFormatter:
         # Assert
         assert result == "No Python files analyzed."
 
-    def test_format_summary_with_results(self, sample_results: List[FileComplexityResult]) -> None:
+    def test_format_summary_with_results(
+        self, sample_results: list[FileComplexityResult]
+    ) -> None:
         """Test formatting results as summary."""
         # Arrange
         formatter = OutputFormatter()
@@ -311,7 +320,9 @@ class TestOutputFormatter:
         parsed = json.loads(result)
         assert parsed == []
 
-    def test_format_functions_json_with_results(self, sample_results: List[FileComplexityResult]) -> None:
+    def test_format_functions_json_with_results(
+        self, sample_results: list[FileComplexityResult]
+    ) -> None:
         """Test formatting results as functions JSON."""
         formatter = OutputFormatter()
         result = formatter.format_functions_json(sample_results)
@@ -400,7 +411,9 @@ class TestOutputFormatter:
         assert "cyclomatic_complexity" in header
         assert "cognitive_complexity" in header
 
-    def test_format_functions_csv_with_results(self, sample_results: List[FileComplexityResult]) -> None:
+    def test_format_functions_csv_with_results(
+        self, sample_results: list[FileComplexityResult]
+    ) -> None:
         """Test formatting results as functions CSV."""
         formatter = OutputFormatter()
         result = formatter.format_functions_csv(sample_results)

@@ -16,6 +16,7 @@ from .cli_helpers import (
 )
 from .formatters import OutputFormatter
 from .logging_config import setup_logging
+from .type_helpers import get_list_value, get_optional_int_value
 
 
 @click.group(invoke_without_command=True)
@@ -131,11 +132,11 @@ def check(
     # Validate required configuration
     validate_required_config(merged_config)
 
-    final_max_complexity = merged_config["max_complexity"]
-    final_max_cognitive = merged_config["max_cognitive"]
-    final_exclude = merged_config["exclude"]
-    final_include = merged_config["include"]
-    final_paths = merged_config["paths"]
+    final_max_complexity = get_optional_int_value(merged_config["max_complexity"])
+    final_max_cognitive = get_optional_int_value(merged_config["max_cognitive"])
+    final_exclude = get_list_value(merged_config["exclude"])
+    final_include = get_list_value(merged_config["include"])
+    final_paths = get_list_value(merged_config["paths"])
 
     # Create analyzer and service
     analyzer, service = create_analyzer_service(max_complexity=final_max_complexity)
@@ -149,15 +150,18 @@ def check(
         handle_no_results()
 
     # Filter files that exceed thresholds
-    failed_results = service.filter_failed_results(
-        all_results, final_max_complexity, final_max_cognitive
-    )
-
-    if failed_results:
-        display_failed_results(
-            failed_results, len(all_results), final_max_complexity, final_max_cognitive
+    if final_max_complexity is not None:
+        failed_results = service.filter_failed_results(
+            all_results, final_max_complexity, final_max_cognitive
         )
-        sys.exit(1)
+
+        if failed_results:
+            display_failed_results(
+                failed_results, len(all_results), final_max_complexity, final_max_cognitive
+            )
+            sys.exit(1)
+        else:
+            display_success_results(len(all_results))
     else:
         display_success_results(len(all_results))
 
@@ -226,9 +230,9 @@ def show_list(
         paths=paths,
     )
 
-    final_exclude = merged_config["exclude"]
-    final_include = merged_config["include"]
-    final_paths = merged_config["paths"]
+    final_exclude = get_list_value(merged_config["exclude"])
+    final_include = get_list_value(merged_config["include"])
+    final_paths = get_list_value(merged_config["paths"])
 
     # Create analyzer and service
     analyzer, service = create_analyzer_service()
@@ -308,9 +312,9 @@ def show_functions(
         paths=paths,
     )
 
-    final_exclude = merged_config["exclude"]
-    final_include = merged_config["include"]
-    final_paths = merged_config["paths"]
+    final_exclude = get_list_value(merged_config["exclude"])
+    final_include = get_list_value(merged_config["include"])
+    final_paths = get_list_value(merged_config["paths"])
 
     # Create analyzer and service
     analyzer, service = create_analyzer_service()
@@ -389,9 +393,9 @@ def show_summary(
         paths=paths,
     )
 
-    final_exclude = merged_config["exclude"]
-    final_include = merged_config["include"]
-    final_paths = merged_config["paths"]
+    final_exclude = get_list_value(merged_config["exclude"])
+    final_include = get_list_value(merged_config["include"])
+    final_paths = get_list_value(merged_config["paths"])
 
     # Create analyzer and service
     analyzer, service = create_analyzer_service()

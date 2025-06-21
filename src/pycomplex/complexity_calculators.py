@@ -3,7 +3,7 @@
 import ast
 import logging
 from abc import ABC, abstractmethod
-from typing import ClassVar, Dict, List, Type, Union
+from typing import ClassVar, Union
 
 import mccabe
 from cognitive_complexity.api import get_cognitive_complexity
@@ -110,7 +110,7 @@ class CognitiveComplexityCalculator(ComplexityCalculator):
 class ComplexityCalculatorFactory:
     """Factory for creating complexity calculators."""
 
-    _calculators: ClassVar[Dict[str, Type[ComplexityCalculator]]] = {
+    _calculators: ClassVar[dict[str, type[ComplexityCalculator]]] = {
         "cyclomatic": CyclomaticComplexityCalculator,
         "cognitive": CognitiveComplexityCalculator,
     }
@@ -139,7 +139,7 @@ class ComplexityCalculatorFactory:
         return cls._calculators[calculator_type]()
 
     @classmethod
-    def get_available_types(cls) -> List[str]:
+    def get_available_types(cls) -> list[str]:
         """Get list of available calculator types.
 
         Returns:
@@ -150,7 +150,7 @@ class ComplexityCalculatorFactory:
 
     @classmethod
     def register_calculator(
-        cls, name: str, calculator_class: Type[ComplexityCalculator]
+        cls, name: str, calculator_class: type[ComplexityCalculator]
     ) -> None:
         """Register a new complexity calculator type.
 

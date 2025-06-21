@@ -1,20 +1,31 @@
 """Configuration management for pycomplex."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Optional, Protocol, Union
 
 from pydantic import ValidationError
 
 from .models import PyComplexSettings
 
+
+class TomlLoader(Protocol):
+    """Protocol for TOML loading functionality."""
+
+    def load(self, fp: object) -> dict[str, object]:
+        """Load TOML data from file pointer."""
+        ...
+
+
 try:
     import tomllib  # type: ignore[import-not-found]
+    toml_loader: Optional[TomlLoader] = tomllib
 except ImportError:
     # Python < 3.11
     try:
-        import tomli as tomllib
+        import tomli  # type: ignore[import-not-found]
+        toml_loader = tomli
     except ImportError:
-        tomllib = None
+        toml_loader = None
 
 
 class PyComplexConfig:
@@ -42,20 +53,24 @@ class PyComplexConfig:
 
         return None
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, object]:
         """Load configuration from pyproject.toml file."""
         if not self.config_path or not self.config_path.exists():
             return {}
 
-        if tomllib is None:
+        if toml_loader is None:
             # No TOML parser available, return empty config
             return {}
 
         try:
             with self.config_path.open("rb") as f:
-                config_data = tomllib.load(f)
-                pycomplex_config: Dict[str, Any] = config_data.get("tool", {}).get("pycomplex", {})
-                return pycomplex_config
+                config_data = toml_loader.load(f)
+                tool_config = config_data.get("tool", {})
+                if isinstance(tool_config, dict):
+                    pycomplex_config = tool_config.get("pycomplex", {})
+                    if isinstance(pycomplex_config, dict):
+                        return pycomplex_config
+                return {}
         except Exception:
             # If parsing fails, use empty config
             return {}
@@ -79,19 +94,19 @@ class PyComplexConfig:
         """Get maximum cognitive complexity threshold."""
         return self._get_settings().max_cognitive
 
-    def get_exclude_patterns(self) -> List[str]:
+    def get_exclude_patterns(self) -> list[str]:
         """Get file patterns to exclude."""
         return self._get_settings().exclude
 
-    def get_include_patterns(self) -> List[str]:
+    def get_include_patterns(self) -> list[str]:
         """Get file patterns to include."""
         return self._get_settings().include
 
-    def get_default_paths(self) -> List[str]:
+    def get_default_paths(self) -> list[str]:
         """Get default paths to analyze."""
         return self._get_settings().paths
 
-    def get_status_thresholds(self) -> Dict[str, Dict[str, int]]:
+    def get_status_thresholds(self) -> dict[str, dict[str, int]]:
         """Get status classification thresholds."""
         return self._get_settings().status_thresholds
 
@@ -99,10 +114,10 @@ class PyComplexConfig:
         self,
         max_complexity: Optional[int] = None,
         max_cognitive: Optional[int] = None,
-        exclude: Optional[List[str]] = None,
-        include: Optional[List[str]] = None,
-        paths: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        exclude: Optional[list[str]] = None,
+        include: Optional[list[str]] = None,
+        paths: Optional[list[str]] = None,
+    ) -> dict[str, Union[str, int, list[str], None]]:
         """Merge configuration with CLI options, CLI takes precedence."""
         settings = self._get_settings()
         return {

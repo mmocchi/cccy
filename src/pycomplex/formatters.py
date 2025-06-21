@@ -3,7 +3,6 @@
 import csv
 import json
 from io import StringIO
-from typing import List
 
 from tabulate import tabulate
 
@@ -14,7 +13,7 @@ class OutputFormatter:
     """Formats complexity analysis results for output."""
 
     @staticmethod
-    def format_table(results: List[FileComplexityResult]) -> str:
+    def format_table(results: list[FileComplexityResult]) -> str:
         """Format results as a table.
 
         Args:
@@ -43,7 +42,7 @@ class OutputFormatter:
         return str(tabulate(rows, headers=headers, tablefmt="grid"))
 
     @staticmethod
-    def format_detailed_table(results: List[FileComplexityResult]) -> str:
+    def format_detailed_table(results: list[FileComplexityResult]) -> str:
         """Format results as a detailed table with function-level information.
 
         Args:
@@ -87,7 +86,7 @@ class OutputFormatter:
         return "\n".join(output)
 
     @staticmethod
-    def format_json(results: List[FileComplexityResult]) -> str:
+    def format_json(results: list[FileComplexityResult]) -> str:
         """Format results as JSON using Pydantic model serialization.
 
         Args:
@@ -135,7 +134,7 @@ class OutputFormatter:
         return json.dumps(data, indent=2, default=str)
 
     @staticmethod
-    def format_csv(results: List[FileComplexityResult]) -> str:
+    def format_csv(results: list[FileComplexityResult]) -> str:
         """Format results as CSV.
 
         Args:
@@ -196,7 +195,7 @@ class OutputFormatter:
         return output.getvalue()
 
     @staticmethod
-    def format_functions_json(results: List[FileComplexityResult]) -> str:
+    def format_functions_json(results: list[FileComplexityResult]) -> str:
         """Format function-level results as JSON.
 
         Args:
@@ -225,7 +224,7 @@ class OutputFormatter:
         return json.dumps(data, indent=2, default=str)
 
     @staticmethod
-    def format_functions_csv(results: List[FileComplexityResult]) -> str:
+    def format_functions_csv(results: list[FileComplexityResult]) -> str:
         """Format function-level results as CSV.
 
         Args:
@@ -269,7 +268,7 @@ class OutputFormatter:
         return output.getvalue()
 
     @staticmethod
-    def format_summary(results: List[FileComplexityResult]) -> str:
+    def format_summary(results: list[FileComplexityResult]) -> str:
         """Format a summary of the analysis results.
 
         Args:

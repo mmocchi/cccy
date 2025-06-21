@@ -13,7 +13,6 @@ class TestPyComplexConfig:
         """Test initialization without config file."""
         # Arrange
         with tempfile.TemporaryDirectory() as tmpdir:
-
             # Act
             config_manager = PyComplexConfig(Path(tmpdir) / "nonexistent.toml")
 

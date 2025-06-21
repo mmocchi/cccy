@@ -65,3 +65,48 @@ tasks:
       - rm -rf dist/ build/ *.egg-info/
       - find . -type d -name __pycache__ -exec rm -rf {} +
       - find . -type f -name "*.pyc" -delete
+  
+  tox:
+    desc: Run tox for all Python versions
+    cmds:
+      - uv run tox
+  
+  tox-py39:
+    desc: Run tox for Python 3.9
+    cmds:
+      - uv run tox -e py39
+  
+  tox-py310:
+    desc: Run tox for Python 3.10
+    cmds:
+      - uv run tox -e py310
+  
+  tox-py311:
+    desc: Run tox for Python 3.11
+    cmds:
+      - uv run tox -e py311
+  
+  tox-py312:
+    desc: Run tox for Python 3.12
+    cmds:
+      - uv run tox -e py312
+  
+  tox-py313:
+    desc: Run tox for Python 3.13
+    cmds:
+      - uv run tox -e py313
+  
+  tox-lint:
+    desc: Run tox lint environment
+    cmds:
+      - uv run tox -e lint
+  
+  tox-test:
+    desc: Run tox test environment
+    cmds:
+      - uv run tox -e test
+  
+  tox-complexity:
+    desc: Run tox complexity environment
+    cmds:
+      - uv run tox -e complexity

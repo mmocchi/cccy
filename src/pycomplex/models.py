@@ -1,6 +1,6 @@
 """Pydantic models for data structures and configuration."""
 
-from typing import Dict, List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -28,7 +28,7 @@ class FileComplexityResult(BaseModel):
     """Result of complexity analysis for a single file."""
 
     file_path: str
-    functions: List[ComplexityResult] = Field(default_factory=list)
+    functions: list[ComplexityResult] = Field(default_factory=list)
     total_cyclomatic: int = Field(
         ge=0, description="Sum of all function cyclomatic complexities"
     )
@@ -96,13 +96,13 @@ class PyComplexSettings(BaseSettings):
     max_cognitive: Optional[int] = Field(
         None, ge=1, description="Maximum allowed cognitive complexity"
     )
-    exclude: List[str] = Field(
+    exclude: list[str] = Field(
         default_factory=list, description="File patterns to exclude from analysis"
     )
-    include: List[str] = Field(
+    include: list[str] = Field(
         default_factory=list, description="File patterns to include in analysis"
     )
-    paths: List[str] = Field(
+    paths: list[str] = Field(
         default_factory=lambda: ["."], description="Default paths to analyze"
     )
     status_thresholds: dict = Field(
@@ -119,7 +119,7 @@ class PyComplexSettings(BaseSettings):
 
     @field_validator("status_thresholds")
     @classmethod
-    def validate_status_thresholds(cls, v: dict) -> Dict[str, Dict[str, int]]:
+    def validate_status_thresholds(cls, v: dict) -> dict[str, dict[str, int]]:
         """Validate and merge status thresholds with defaults."""
         # Start with defaults
         defaults = {
@@ -167,4 +167,3 @@ class PyComplexSettings(BaseSettings):
             converted_data[snake_key] = value
 
         return cls(**converted_data)
-

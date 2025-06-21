@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import click
 
@@ -28,10 +28,10 @@ class AnalyzerService:
         self,
         paths: tuple,
         recursive: bool = True,
-        exclude_patterns: Optional[List[str]] = None,
-        include_patterns: Optional[List[str]] = None,
+        exclude_patterns: Optional[list[str]] = None,
+        include_patterns: Optional[list[str]] = None,
         verbose: bool = False,
-    ) -> List[FileComplexityResult]:
+    ) -> list[FileComplexityResult]:
         """Analyze given paths and return complexity results.
 
         Args:
@@ -66,10 +66,10 @@ class AnalyzerService:
         self,
         path: Path,
         recursive: bool,
-        exclude_patterns: List[str],
-        include_patterns: List[str],
+        exclude_patterns: list[str],
+        include_patterns: list[str],
         verbose: bool,
-    ) -> List[FileComplexityResult]:
+    ) -> list[FileComplexityResult]:
         """Analyze a single path (file or directory).
 
         Args:
@@ -101,10 +101,10 @@ class AnalyzerService:
         self,
         path: Path,
         recursive: bool,
-        exclude_patterns: List[str],
-        include_patterns: List[str],
+        exclude_patterns: list[str],
+        include_patterns: list[str],
         verbose: bool,
-    ) -> List[FileComplexityResult]:
+    ) -> list[FileComplexityResult]:
         """Process a path based on its type.
 
         Args:
@@ -194,10 +194,10 @@ class AnalyzerService:
         self,
         directory: Path,
         recursive: bool,
-        exclude_patterns: List[str],
-        include_patterns: List[str],
+        exclude_patterns: list[str],
+        include_patterns: list[str],
         verbose: bool = False,
-    ) -> List[FileComplexityResult]:
+    ) -> list[FileComplexityResult]:
         """Analyze a directory.
 
         Args:
@@ -233,10 +233,10 @@ class AnalyzerService:
 
     def filter_failed_results(
         self,
-        results: List[FileComplexityResult],
+        results: list[FileComplexityResult],
         max_complexity: int,
         max_cognitive: Optional[int] = None,
-    ) -> List[FileComplexityResult]:
+    ) -> list[FileComplexityResult]:
         """Filter results that exceed complexity thresholds.
 
         Args:

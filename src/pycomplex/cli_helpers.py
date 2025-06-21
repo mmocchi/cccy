@@ -1,23 +1,24 @@
 """Helper functions for CLI operations."""
 
 import sys
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Optional, Union
 
 import click
 
 from .analyzer import ComplexityAnalyzer
 from .config import PyComplexConfig
 from .formatters import OutputFormatter
+from .models import ComplexityResult, FileComplexityResult
 from .services import AnalyzerService
 
 
 def load_and_merge_config(
     max_complexity: Optional[int] = None,
     max_cognitive: Optional[int] = None,
-    exclude: Optional[Tuple[str, ...]] = None,
-    include: Optional[Tuple[str, ...]] = None,
-    paths: Optional[Tuple[str, ...]] = None,
-) -> Dict[str, Any]:
+    exclude: Optional[tuple[str, ...]] = None,
+    include: Optional[tuple[str, ...]] = None,
+    paths: Optional[tuple[str, ...]] = None,
+) -> dict[str, Union[str, int, list[str], None]]:
     """Load configuration and merge with CLI options.
 
     Args:
@@ -43,7 +44,7 @@ def load_and_merge_config(
 
 def create_analyzer_service(
     max_complexity: Optional[int] = None,
-) -> Tuple[ComplexityAnalyzer, AnalyzerService]:
+) -> tuple[ComplexityAnalyzer, AnalyzerService]:
     """Create analyzer and service instances.
 
     Args:
@@ -65,7 +66,7 @@ def handle_no_results() -> None:
 
 
 def display_failed_results(
-    failed_results: List,
+    failed_results: list,
     total_results_count: int,
     max_complexity: int,
     max_cognitive: Optional[int] = None,
@@ -94,7 +95,7 @@ def _display_failure_header() -> None:
 
 
 def _display_single_failed_result(
-    result: Any, max_complexity: int, max_cognitive: Optional[int]
+    result: FileComplexityResult, max_complexity: int, max_cognitive: Optional[int]
 ) -> None:
     """Display details for a single failed result.
 
@@ -120,8 +121,8 @@ def _display_single_failed_result(
 
 
 def _get_problem_functions(
-    functions: Any, max_complexity: int, max_cognitive: Optional[int]
-) -> List[str]:
+    functions: list[ComplexityResult], max_complexity: int, max_cognitive: Optional[int]
+) -> list[str]:
     """Get list of functions that exceed complexity thresholds.
 
     Args:
@@ -171,7 +172,7 @@ def display_success_results(total_results_count: int) -> None:
     click.echo(f"✅ All {total_results_count} files passed complexity check!")
 
 
-def validate_required_config(merged_config: Dict[str, Any]) -> None:
+def validate_required_config(merged_config: dict[str, Union[str, int, list[str], None]]) -> None:
     """Validate that required configuration is present.
 
     Args:
@@ -190,7 +191,7 @@ def validate_required_config(merged_config: Dict[str, Any]) -> None:
 
 
 def format_and_display_output(
-    results: List,
+    results: list,
     output_format: str,
     formatter: OutputFormatter,
 ) -> None:

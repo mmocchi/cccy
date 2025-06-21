@@ -2,7 +2,7 @@
 
 import ast
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from .complexity_calculators import (
     CognitiveComplexityCalculator,
@@ -57,9 +57,9 @@ class ComplexityAnalyzer:
         self,
         directory: Union[str, Path],
         recursive: bool = True,
-        exclude_patterns: Optional[List[str]] = None,
-        include_patterns: Optional[List[str]] = None,
-    ) -> List[FileComplexityResult]:
+        exclude_patterns: Optional[list[str]] = None,
+        include_patterns: Optional[list[str]] = None,
+    ) -> list[FileComplexityResult]:
         """Analyze all Python files in a directory.
 
         Args:
@@ -88,9 +88,9 @@ class ComplexityAnalyzer:
         self,
         directory: Path,
         recursive: bool,
-        exclude_patterns: List[str],
-        include_patterns: List[str],
-    ) -> List[Path]:
+        exclude_patterns: list[str],
+        include_patterns: list[str],
+    ) -> list[Path]:
         """Get list of Python files to analyze from directory.
 
         Args:
@@ -113,7 +113,7 @@ class ComplexityAnalyzer:
         ]
 
     def _should_include_file(
-        self, file_path: Path, exclude_patterns: List[str], include_patterns: List[str]
+        self, file_path: Path, exclude_patterns: list[str], include_patterns: list[str]
     ) -> bool:
         """Determine if a file should be included in analysis.
 
@@ -136,7 +136,7 @@ class ComplexityAnalyzer:
 
         return True
 
-    def _analyze_files(self, files: List[Path]) -> List[FileComplexityResult]:
+    def _analyze_files(self, files: list[Path]) -> list[FileComplexityResult]:
         """Analyze a list of files.
 
         Args:
@@ -210,7 +210,7 @@ class ComplexityAnalyzer:
             max_cognitive=max_cognitive,
         )
 
-    def should_fail(self, results: List[FileComplexityResult]) -> bool:
+    def should_fail(self, results: list[FileComplexityResult]) -> bool:
         """Determine if analysis should fail based on complexity thresholds.
 
         Args:

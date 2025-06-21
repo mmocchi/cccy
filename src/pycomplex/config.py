@@ -17,7 +17,7 @@ class TomlLoader(Protocol):
 
 
 try:
-    import tomllib  # type: ignore[import-not-found]
+    import tomllib
     toml_loader: Optional[TomlLoader] = tomllib
 except ImportError:
     # Python < 3.11

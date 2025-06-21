@@ -1,6 +1,6 @@
 # cccy
 
-A Python complexity measurement tool that analyzes your code for Cyclomatic and Cognitive complexity.
+Pythonコードの循環的複雑度と認知的複雑度を解析するツールです。
 
 ## Features
 

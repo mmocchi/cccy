@@ -1,4 +1,4 @@
-"""Complexity analysis module for Python source code."""
+"""Pythonソースコードの複雑度解析モジュール。"""
 
 import ast
 from pathlib import Path
@@ -12,13 +12,13 @@ from .models import ComplexityResult, FileComplexityResult
 
 
 class ComplexityAnalyzer:
-    """Analyzes Python source code for complexity metrics."""
+    """複雑度メトリクスのためにPythonソースコードを解析します。"""
 
     def __init__(self, max_complexity: Optional[int] = None) -> None:
-        """Initialize analyzer with optional complexity threshold.
+        """オプションの複雑度闾値でアナライザーを初期化します。
 
         Args:
-            max_complexity: Maximum allowed cyclomatic complexity
+            max_complexity: 許可される最大の循環的複雑度
 
         """
         self.max_complexity = max_complexity
@@ -28,13 +28,13 @@ class ComplexityAnalyzer:
     def analyze_file(
         self, file_path: Union[str, Path]
     ) -> Optional[FileComplexityResult]:
-        """Analyze a single Python file for complexity.
+        """単一のPythonファイルの複雑度を解析します。
 
         Args:
-            file_path: Path to Python file to analyze
+            file_path: 解析するPythonファイルのパス
 
         Returns:
-            FileComplexityResult or None if file cannot be analyzed
+            FileComplexityResultまたはファイルを解析できない場合はNone
 
         """
         file_path = Path(file_path)
@@ -60,16 +60,16 @@ class ComplexityAnalyzer:
         exclude_patterns: Optional[list[str]] = None,
         include_patterns: Optional[list[str]] = None,
     ) -> list[FileComplexityResult]:
-        """Analyze all Python files in a directory.
+        """ディレクトリ内のすべてのPythonファイルを解析します。
 
         Args:
-            directory: Directory to analyze
-            recursive: Whether to analyze subdirectories
-            exclude_patterns: List of glob patterns to exclude
-            include_patterns: List of glob patterns to include (if specified, only these will be analyzed)
+            directory: 解析するディレクトリ
+            recursive: サブディレクトリも解析するかどうか
+            exclude_patterns: 除外するグロブパターンのリスト
+            include_patterns: 含めるグロブパターンのリスト（指定した場合、これらのみが解析される）
 
         Returns:
-            List of FileComplexityResult objects
+            FileComplexityResultオブジェクトのリスト
 
         """
         directory = Path(directory)
@@ -91,16 +91,16 @@ class ComplexityAnalyzer:
         exclude_patterns: list[str],
         include_patterns: list[str],
     ) -> list[Path]:
-        """Get list of Python files to analyze from directory.
+        """ディレクトリから解析するPythonファイルのリストを取得します。
 
         Args:
-            directory: Directory to search
-            recursive: Whether to search recursively
-            exclude_patterns: Patterns to exclude
-            include_patterns: Patterns to include (if specified, only these)
+            directory: 検索するディレクトリ
+            recursive: 再帰的に検索するかどうか
+            exclude_patterns: 除外するパターン
+            include_patterns: 含めるパターン（指定された場合、これらのみ）
 
         Returns:
-            List of Python file paths to analyze
+            解析するPythonファイルパスのリスト
 
         """
         pattern = "**/*.py" if recursive else "*.py"
@@ -115,35 +115,35 @@ class ComplexityAnalyzer:
     def _should_include_file(
         self, file_path: Path, exclude_patterns: list[str], include_patterns: list[str]
     ) -> bool:
-        """Determine if a file should be included in analysis.
+        """ファイルを解析に含めるかどうかを判定します。
 
         Args:
-            file_path: Path to the file
-            exclude_patterns: Patterns to exclude
-            include_patterns: Patterns to include (if specified, only these)
+            file_path: ファイルのパス
+            exclude_patterns: 除外するパターン
+            include_patterns: 含めるパターン（指定された場合、これらのみ）
 
         Returns:
-            True if file should be included
+            ファイルを含める必要がある場合はTrue
 
         """
-        # Skip excluded files
+        # 除外されたファイルをスキップ
         if any(file_path.match(pattern) for pattern in exclude_patterns):
             return False
 
-        # If include patterns are specified, only include matching files
+        # インクルードパターンが指定されている場合、マッチするファイルのみを含める
         if include_patterns:
             return any(file_path.match(pattern) for pattern in include_patterns)
 
         return True
 
     def _analyze_files(self, files: list[Path]) -> list[FileComplexityResult]:
-        """Analyze a list of files.
+        """ファイルのリストを解析します。
 
         Args:
-            files: List of file paths to analyze
+            files: 解析するファイルパスのリスト
 
         Returns:
-            List of analysis results
+            解析結果のリスト
 
         """
         results = []
@@ -156,14 +156,14 @@ class ComplexityAnalyzer:
     def _analyze_source(
         self, file_path: str, source_code: str
     ) -> Optional[FileComplexityResult]:
-        """Analyze source code for complexity metrics.
+        """複雑度メトリクスのためにソースコードを解析します。
 
         Args:
-            file_path: Path to the source file
-            source_code: Python source code to analyze
+            file_path: ソースファイルのパス
+            source_code: 解析するPythonソースコード
 
         Returns:
-            FileComplexityResult or None if analysis fails
+            FileComplexityResultまたは解析が失敗した場合はNone
 
         """
         try:
@@ -178,11 +178,11 @@ class ComplexityAnalyzer:
         max_cognitive = 0
 
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                # Calculate cyclomatic complexity using calculator
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):  # 関数と非同期関数
+                # カルキュレーターを使用して循環的複雑度を計算
                 cyclomatic = self.cyclomatic_calculator.calculate(node)
 
-                # Calculate cognitive complexity using calculator
+                # カルキュレーターを使用して認知的複雑度を計算
                 cognitive = self.cognitive_calculator.calculate(node)
 
                 result = ComplexityResult(
@@ -211,13 +211,13 @@ class ComplexityAnalyzer:
         )
 
     def should_fail(self, results: list[FileComplexityResult]) -> bool:
-        """Determine if analysis should fail based on complexity thresholds.
+        """複雑度の闾値に基づいて解析が失敗すべきかどうかを判定します。
 
         Args:
-            results: List of file analysis results
+            results: ファイル解析結果のリスト
 
         Returns:
-            True if any file exceeds complexity threshold
+            いずれかのファイルが複雑度の闾値を超えている場合はTrue
 
         """
         if not self.max_complexity:

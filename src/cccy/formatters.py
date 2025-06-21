@@ -1,4 +1,4 @@
-"""Output formatters for complexity analysis results."""
+"""複雑度解析結果の出力フォーマッター。"""
 
 import csv
 import json

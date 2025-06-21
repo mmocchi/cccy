@@ -1,4 +1,4 @@
-"""Command line interface for pycomplex."""
+"""Python複雑度解析ツールのコマンドラインインターフェース。"""
 
 import sys
 from typing import Optional
@@ -36,27 +36,27 @@ def main(ctx: click.Context) -> None:
     └─────────────────────────────────────────────────────────┘
 
     \b
-    Analyze Python code for Cyclomatic and Cognitive complexity.
-    Enforce complexity thresholds in CI/CD pipelines.
-    Configure via pyproject.toml for project-wide settings.
+    Pythonコードの循環的複雑度と認知的複雑度を解析します。
+    CI/CDパイプラインで複雑度の閾値を強制できます。
+    プロジェクト全体の設定にはpyproject.tomlを使用します。
 
     \b
     QUICK START:
-      pycomplex check                    # Use pyproject.toml config
-      pycomplex show-list src/           # Analyze src/ directory
+      pycomplex check                    # pyproject.toml設定を使用
+      pycomplex show-list src/           # src/ディレクトリを解析
       pycomplex check --max-complexity 10 src/
 
     \b
     COMMANDS:
-      check          Validate complexity thresholds (CI-friendly)
-      show-list      Display detailed complexity metrics
-      show-functions Show function-level complexity metrics
-      show-summary   Show aggregated statistics
+      check          複雑度の閾値を検証（CI対応）
+      show-list      詳細な複雑度メトリクスを表示
+      show-functions 関数レベルの複雑度メトリクスを表示
+      show-summary   集約統計を表示
 
     \b
     CONFIGURATION:
-      Add [tool.pycomplex] section to pyproject.toml
-      Set max-complexity, exclude patterns, default paths, etc.
+      pyproject.tomlに[tool.pycomplex]セクションを追加
+      max-complexity、除外パターン、デフォルトパスなどを設定
     """
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())

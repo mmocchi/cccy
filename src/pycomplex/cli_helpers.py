@@ -172,7 +172,9 @@ def display_success_results(total_results_count: int) -> None:
     click.echo(f"✅ All {total_results_count} files passed complexity check!")
 
 
-def validate_required_config(merged_config: dict[str, Union[str, int, list[str], None]]) -> None:
+def validate_required_config(
+    merged_config: dict[str, Union[str, int, list[str], None]],
+) -> None:
     """Validate that required configuration is present.
 
     Args:

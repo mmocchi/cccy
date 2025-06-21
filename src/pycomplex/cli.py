@@ -157,7 +157,10 @@ def check(
 
         if failed_results:
             display_failed_results(
-                failed_results, len(all_results), final_max_complexity, final_max_cognitive
+                failed_results,
+                len(all_results),
+                final_max_complexity,
+                final_max_cognitive,
             )
             sys.exit(1)
         else:

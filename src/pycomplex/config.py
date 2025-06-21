@@ -18,12 +18,14 @@ class TomlLoader(Protocol):
 
 try:
     import tomllib
+
     toml_loader: Optional[TomlLoader] = tomllib
 except ImportError:
     # Python < 3.11
     try:
         import tomli
-        toml_loader = tomli  # type: ignore[assignment]
+
+        toml_loader = tomli
     except ImportError:
         toml_loader = None
 

@@ -1,19 +1,19 @@
-"""Custom exceptions for pycomplex."""
+"""Custom exceptions for cccy."""
 
 
-class PyComplexError(Exception):
-    """Base exception for pycomplex errors."""
+class CccyError(Exception):
+    """Base exception for cccy errors."""
 
     pass
 
 
-class ConfigurationError(PyComplexError):
+class ConfigurationError(CccyError):
     """Raised when there's an issue with configuration."""
 
     pass
 
 
-class AnalysisError(PyComplexError):
+class AnalysisError(CccyError):
     """Raised when analysis fails."""
 
     pass
@@ -49,7 +49,7 @@ class DirectoryAnalysisError(AnalysisError):
         super().__init__(f"Error analyzing directory {directory_path}: {message}")
 
 
-class ComplexityCalculationError(PyComplexError):
+class ComplexityCalculationError(CccyError):
     """Raised when complexity calculation fails."""
 
     def __init__(self, function_name: str, calculator_type: str, message: str) -> None:

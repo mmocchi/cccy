@@ -52,7 +52,7 @@ jobs:
         id: check_testpypi
         continue-on-error: true
         run: |
-          response=$(curl -s -w "%{http_code}" -o /dev/null "https://test.pypi.org/pypi/pycomplex/${{ steps.get_version.outputs.version }}/")
+          response=$(curl -s -w "%{http_code}" -o /dev/null "https://test.pypi.org/pypi/cccy/${{ steps.get_version.outputs.version }}/")
           if [ "$response" = "200" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Version ${{ steps.get_version.outputs.version }} exists on TestPyPI"
@@ -103,7 +103,7 @@ jobs:
           ## Installation
           
           \`\`\`bash
-          pip install pycomplex==${{ steps.get_version.outputs.version }}
+          pip install cccy==${{ steps.get_version.outputs.version }}
           \`\`\`
           
           ## Full Changelog

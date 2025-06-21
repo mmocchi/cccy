@@ -3,8 +3,8 @@
 import tempfile
 from pathlib import Path
 
-from pycomplex.analyzer import ComplexityAnalyzer
-from pycomplex.models import ComplexityResult, FileComplexityResult
+from cccy.analyzer import ComplexityAnalyzer
+from cccy.models import ComplexityResult, FileComplexityResult
 
 
 class TestComplexityAnalyzer:

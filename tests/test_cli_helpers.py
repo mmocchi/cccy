@@ -4,12 +4,12 @@ from typing import Any
 
 import pytest
 
-from pycomplex.cli_helpers import (
+from cccy.cli_helpers import (
     format_and_display_output,
     validate_required_config,
 )
-from pycomplex.formatters import OutputFormatter
-from pycomplex.models import ComplexityResult, FileComplexityResult
+from cccy.formatters import OutputFormatter
+from cccy.models import ComplexityResult, FileComplexityResult
 
 
 class TestCliHelpers:

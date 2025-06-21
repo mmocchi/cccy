@@ -1,9 +1,9 @@
-- id: pycomplex
+- id: cccy
   name: Python Complexity Check
-  description: Check Python code complexity using pycomplex
-  entry: pycomplex
+  description: Check Python code complexity using cccy
+  entry: cccy
   language: python
   files: \.py$
   args: [--max-complexity=10]
   additional_dependencies:
-    - pycomplex
+    - cccy

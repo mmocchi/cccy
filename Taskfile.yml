@@ -30,17 +30,17 @@ tasks:
   complexity:
     desc: Analyze code complexity
     cmds:
-      - uv run pycomplex show-list src/
+      - uv run cccy show-list src/
   
   complexity-summary:
     desc: Show complexity summary
     cmds:
-      - uv run pycomplex show-summary src/
+      - uv run cccy show-summary src/
   
   complexity-check:
     desc: "Check complexity thresholds (max cyclomatic: 10)"
     cmds:
-      - uv run pycomplex check --max-complexity 10 src/
+      - uv run cccy check --max-complexity 10 src/
   
   check:
     desc: Run all checks (complexity, linting, formatting)

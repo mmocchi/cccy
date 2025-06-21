@@ -1,8 +1,8 @@
 """Python complexity measurement tool."""
 
 __version__ = "0.1.0"
-__author__ = "pycomplex"
-__email__ = "pycomplex@example.com"
+__author__ = "cccy"
+__email__ = "cccy@example.com"
 
 from .analyzer import ComplexityAnalyzer
 from .complexity_calculators import (
@@ -11,14 +11,14 @@ from .complexity_calculators import (
     ComplexityCalculatorFactory,
     CyclomaticComplexityCalculator,
 )
-from .config import PyComplexConfig
+from .config import CccyConfig
 from .exceptions import (
     AnalysisError,
+    CccyError,
     ComplexityCalculationError,
     ConfigurationError,
     DirectoryAnalysisError,
     FileAnalysisError,
-    PyComplexError,
 )
 from .formatters import OutputFormatter
 from .models import ComplexityResult, FileComplexityResult
@@ -27,6 +27,8 @@ from .services import AnalyzerService
 __all__ = [
     "AnalysisError",
     "AnalyzerService",
+    "CccyConfig",
+    "CccyError",
     "CognitiveComplexityCalculator",
     "ComplexityAnalyzer",
     "ComplexityCalculationError",
@@ -39,6 +41,4 @@ __all__ = [
     "FileAnalysisError",
     "FileComplexityResult",
     "OutputFormatter",
-    "PyComplexConfig",
-    "PyComplexError",
 ]

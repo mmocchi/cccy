@@ -1,6 +1,6 @@
 name: 'Python Complexity Analysis'
-description: 'Analyze Python code complexity with pycomplex'
-author: 'pycomplex'
+description: 'Analyze Python code complexity with cccy'
+author: 'cccy'
 
 inputs:
   command:
@@ -53,9 +53,9 @@ runs:
       shell: bash
       run: uv python install
     
-    - name: Install pycomplex
+    - name: Install cccy
       shell: bash
-      run: uv tool install pycomplex
+      run: uv tool install cccy
     
     - name: Run complexity analysis
       shell: bash
@@ -110,7 +110,7 @@ runs:
           args+=("--verbose")
         fi
         
-        uv tool run pycomplex "${args[@]}"
+        uv tool run cccy "${args[@]}"
 
 branding:
   icon: 'bar-chart-2'

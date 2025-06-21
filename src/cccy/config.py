@@ -1,11 +1,11 @@
-"""Configuration management for pycomplex."""
+"""Configuration management for cccy."""
 
 from pathlib import Path
 from typing import Optional, Protocol, Union
 
 from pydantic import ValidationError
 
-from .models import PyComplexSettings
+from .models import CccySettings
 
 
 class TomlLoader(Protocol):
@@ -30,8 +30,8 @@ except ImportError:
         toml_loader = None
 
 
-class PyComplexConfig:
-    """Configuration loader for pycomplex."""
+class CccyConfig:
+    """Configuration loader for cccy."""
 
     def __init__(self, config_path: Optional[Path] = None) -> None:
         """Initialize configuration loader.
@@ -41,7 +41,7 @@ class PyComplexConfig:
 
         """
         self.config_path = config_path or self._find_config_file()
-        self._settings: Optional[PyComplexSettings] = None
+        self._settings: Optional[CccySettings] = None
 
     def _find_config_file(self) -> Optional[Path]:
         """Find pyproject.toml file in current directory or parent directories."""
@@ -69,20 +69,20 @@ class PyComplexConfig:
                 config_data = toml_loader.load(f)
                 tool_config = config_data.get("tool", {})
                 if isinstance(tool_config, dict):
-                    pycomplex_config = tool_config.get("pycomplex", {})
-                    if isinstance(pycomplex_config, dict):
-                        return pycomplex_config
+                    cccy_config = tool_config.get("cccy", {})
+                    if isinstance(cccy_config, dict):
+                        return cccy_config
                 return {}
         except Exception:
             # If parsing fails, use empty config
             return {}
 
-    def _get_settings(self) -> PyComplexSettings:
+    def _get_settings(self) -> CccySettings:
         """Get Pydantic settings instance."""
         if self._settings is None:
             config_data = self._load_config()
             try:
-                self._settings = PyComplexSettings.from_toml_config(config_data)
+                self._settings = CccySettings.from_toml_config(config_data)
             except ValidationError as e:
                 # Convert validation error to user-friendly message
                 raise ValueError(f"Configuration error in pyproject.toml: {e}") from e

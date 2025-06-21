@@ -3,10 +3,10 @@
 import tempfile
 from pathlib import Path
 
-from pycomplex.config import PyComplexConfig
+from cccy.config import CccyConfig
 
 
-class TestPyComplexConfig:
+class TestCccyConfig:
     """Test cases for ConfigManager."""
 
     def test_init_without_config_file(self) -> None:
@@ -14,7 +14,7 @@ class TestPyComplexConfig:
         # Arrange
         with tempfile.TemporaryDirectory() as tmpdir:
             # Act
-            config_manager = PyComplexConfig(Path(tmpdir) / "nonexistent.toml")
+            config_manager = CccyConfig(Path(tmpdir) / "nonexistent.toml")
 
             # Assert - Should use defaults
             assert config_manager.get_max_complexity() is None, (
@@ -34,7 +34,7 @@ class TestPyComplexConfig:
         """Test initialization with config file."""
         # Arrange
         config_content = """
-[tool.pycomplex]
+[tool.cccy]
 max-complexity = 8
 max-cognitive = 6
 exclude = ["*/tests/*", "*/migrations/*"]
@@ -47,7 +47,7 @@ paths = ["src/", "lib/"]
             f.flush()
 
             # Act
-            config_manager = PyComplexConfig(Path(f.name))
+            config_manager = CccyConfig(Path(f.name))
 
             # Assert
             assert config_manager.get_max_complexity() == 8
@@ -63,7 +63,7 @@ paths = ["src/", "lib/"]
         """Test getting default status thresholds."""
         # Arrange
         with tempfile.TemporaryDirectory() as tmpdir:
-            config_manager = PyComplexConfig(Path(tmpdir) / "nonexistent.toml")
+            config_manager = CccyConfig(Path(tmpdir) / "nonexistent.toml")
 
             # Act
             thresholds = config_manager.get_status_thresholds()
@@ -78,7 +78,7 @@ paths = ["src/", "lib/"]
     def test_get_status_thresholds_custom(self) -> None:
         """Test getting custom status thresholds."""
         config_content = """
-[tool.pycomplex]
+[tool.cccy]
 status-thresholds = { medium = { cyclomatic = 3, cognitive = 2 }, high = { cyclomatic = 8, cognitive = 5 } }
 """
 
@@ -86,7 +86,7 @@ status-thresholds = { medium = { cyclomatic = 3, cognitive = 2 }, high = { cyclo
             f.write(config_content)
             f.flush()
 
-            config_manager = PyComplexConfig(Path(f.name))
+            config_manager = CccyConfig(Path(f.name))
             thresholds = config_manager.get_status_thresholds()
 
             expected = {
@@ -98,7 +98,7 @@ status-thresholds = { medium = { cyclomatic = 3, cognitive = 2 }, high = { cyclo
     def test_merge_with_cli_options_all_none(self) -> None:
         """Test merging when all CLI options are None."""
         config_content = """
-[tool.pycomplex]
+[tool.cccy]
 max-complexity = 8
 exclude = ["*/tests/*"]
 paths = ["src/"]
@@ -108,7 +108,7 @@ paths = ["src/"]
             f.write(config_content)
             f.flush()
 
-            config_manager = PyComplexConfig(Path(f.name))
+            config_manager = CccyConfig(Path(f.name))
             merged = config_manager.merge_with_cli_options(
                 max_complexity=None,
                 max_cognitive=None,
@@ -124,7 +124,7 @@ paths = ["src/"]
     def test_merge_with_cli_options_cli_override(self) -> None:
         """Test CLI options overriding config file values."""
         config_content = """
-[tool.pycomplex]
+[tool.cccy]
 max-complexity = 8
 exclude = ["*/tests/*"]
 """
@@ -133,7 +133,7 @@ exclude = ["*/tests/*"]
             f.write(config_content)
             f.flush()
 
-            config_manager = PyComplexConfig(Path(f.name))
+            config_manager = CccyConfig(Path(f.name))
             merged = config_manager.merge_with_cli_options(
                 max_complexity=12,
                 max_cognitive=None,
@@ -149,7 +149,7 @@ exclude = ["*/tests/*"]
     def test_config_with_partial_status_thresholds(self) -> None:
         """Test config with only partial status threshold definitions."""
         config_content = """
-[tool.pycomplex]
+[tool.cccy]
 status-thresholds = { medium = { cyclomatic = 3 } }
 """
 
@@ -157,7 +157,7 @@ status-thresholds = { medium = { cyclomatic = 3 } }
             f.write(config_content)
             f.flush()
 
-            config_manager = PyComplexConfig(Path(f.name))
+            config_manager = CccyConfig(Path(f.name))
             thresholds = config_manager.get_status_thresholds()
 
             # Should merge with defaults
@@ -173,7 +173,7 @@ status-thresholds = { medium = { cyclomatic = 3 } }
     def test_config_file_found_directly(self) -> None:
         """Test finding config file when specified directly."""
         config_content = """
-[tool.pycomplex]
+[tool.cccy]
 max-complexity = 15
 """
 
@@ -182,7 +182,7 @@ max-complexity = 15
             f.flush()
 
             # Initialize with explicit path - should find it
-            config_manager = PyComplexConfig(Path(f.name))
+            config_manager = CccyConfig(Path(f.name))
             assert config_manager.get_max_complexity() == 15
 
     def test_invalid_toml_file(self) -> None:
@@ -192,14 +192,14 @@ max-complexity = 15
             f.flush()
 
             # Should not raise exception, should use defaults
-            config_manager = PyComplexConfig(Path(f.name))
+            config_manager = CccyConfig(Path(f.name))
             assert config_manager.get_max_complexity() is None
 
     def test_get_default_paths_with_current_dir(self) -> None:
         """Test getting default paths when none specified in config."""
         # Arrange
         with tempfile.TemporaryDirectory() as tmpdir:
-            config_manager = PyComplexConfig(Path(tmpdir) / "nonexistent.toml")
+            config_manager = CccyConfig(Path(tmpdir) / "nonexistent.toml")
 
             # Act
             paths = config_manager.get_default_paths()

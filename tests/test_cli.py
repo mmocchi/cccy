@@ -6,7 +6,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from pycomplex.cli import main
+from cccy.cli import main
 
 
 class TestCLI:

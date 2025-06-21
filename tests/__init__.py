@@ -1,1 +1,1 @@
-"""Test package for pycomplex."""
+"""Test package for cccy."""

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pycomplex"
+name = "cccy"
 version = "0.1.0"
 description = "Python complexity measurement tool"
 readme = "README.md"
@@ -35,15 +35,15 @@ dependencies = [
 ]
 
 [project.scripts]
-pycomplex = "pycomplex.cli:main"
+cccy = "cccy.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/example/pycomplex"
-Repository = "https://github.com/example/pycomplex"
-Issues = "https://github.com/example/pycomplex/issues"
+Homepage = "https://github.com/mmocchi/cccy"
+Repository = "https://github.com/mmocchi/cccy"
+Issues = "https://github.com/mmocchi/cccy/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pycomplex"]
+packages = ["src/cccy"]
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -132,7 +132,7 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.ruff.lint.isort]
-known-first-party = ["pycomplex"]
+known-first-party = ["cccy"]
 
 [tool.mypy]
 python_version = "3.9"
@@ -159,7 +159,7 @@ module = [
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "pycomplex.config"
+module = "cccy.config"
 warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
@@ -177,14 +177,14 @@ python_functions = ["test_*"]
 addopts = [
     "--strict-markers",
     "--strict-config",
-    "--cov=pycomplex",
+    "--cov=cccy",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
 ]
 
 [tool.coverage.run]
-source = ["src/pycomplex"]
+source = ["src/cccy"]
 branch = true
 
 [tool.coverage.report]
@@ -201,7 +201,7 @@ exclude_lines = [
     "@(abc\\.)?abstractmethod",
 ]
 
-[tool.pycomplex]
+[tool.cccy]
 # Maximum complexity thresholds
 max-complexity = 10
 max-cognitive = 7

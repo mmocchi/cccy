@@ -1,4 +1,4 @@
-# pycomplex
+# cccy
 
 A Python complexity measurement tool that analyzes your code for Cyclomatic and Cognitive complexity.
 
@@ -18,13 +18,13 @@ A Python complexity measurement tool that analyzes your code for Cyclomatic and 
 ### Using uv (Recommended)
 
 ```bash
-uv tool install pycomplex
+uv tool install cccy
 ```
 
 ### Using pip
 
 ```bash
-pip install pycomplex
+pip install cccy
 ```
 
 ## Usage
@@ -33,34 +33,34 @@ pip install pycomplex
 
 ```bash
 # Show complexity list for all files
-pycomplex show-list src/
+cccy show-list src/
 
 # Check if complexity exceeds thresholds (CI/CD usage)
-pycomplex check --max-complexity 10 src/
+cccy check --max-complexity 10 src/
 
 # Show summary statistics only
-pycomplex show-summary src/
+cccy show-summary src/
 ```
 
 ### Advanced Options
 
 ```bash
 # Different output formats
-pycomplex show-list --format json src/
-pycomplex show-list --format csv src/
-pycomplex show-list --format detailed src/
+cccy show-list --format json src/
+cccy show-list --format csv src/
+cccy show-list --format detailed src/
 
 # Check with both cyclomatic and cognitive thresholds
-pycomplex check --max-complexity 10 --max-cognitive 7 src/
+cccy check --max-complexity 10 --max-cognitive 7 src/
 
 # Exclude specific patterns
-pycomplex show-list --exclude "*/tests/*" --exclude "*/migrations/*" src/
+cccy show-list --exclude "*/tests/*" --exclude "*/migrations/*" src/
 
 # Non-recursive analysis
-pycomplex show-list --no-recursive src/
+cccy show-list --no-recursive src/
 
 # Verbose output
-pycomplex show-summary --verbose src/
+cccy show-summary --verbose src/
 ```
 
 ### Output Formats
@@ -122,8 +122,8 @@ curl https://mise.run | sh
 
 ```bash
 # Clone the repository
-git clone https://github.com/mmocchi/pycomplex.git
-cd pycomplex
+git clone https://github.com/mmocchi/cccy.git
+cd cccy
 
 # Install tools (Python, uv, task)
 mise install
@@ -151,9 +151,9 @@ task format           # = ruff format
 task format-check     # = ruff format --check
 
 # Analyze code complexity
-task complexity       # = pycomplex show-list src/
-task complexity-summary # = pycomplex show-summary src/
-task complexity-check  # = pycomplex check --max-complexity 10 src/
+task complexity       # = cccy show-list src/
+task complexity-summary # = cccy show-summary src/
+task complexity-check  # = cccy check --max-complexity 10 src/
 
 # Run all checks (complexity + lint + format)
 task check
@@ -167,27 +167,27 @@ task clean
 
 ### Subcommands
 
-#### `pycomplex check`
+#### `cccy check`
 CI/CD friendly command that checks complexity against thresholds and exits with error code 1 if any file exceeds limits. Only shows problematic files.
 
 ```bash
-pycomplex check --max-complexity 10 src/
-pycomplex check --max-complexity 10 --max-cognitive 7 src/
+cccy check --max-complexity 10 src/
+cccy check --max-complexity 10 --max-cognitive 7 src/
 ```
 
-#### `pycomplex show-list`
+#### `cccy show-list`
 Shows all files with their complexity metrics in various formats.
 
 ```bash
-pycomplex show-list src/
-pycomplex show-list --format detailed src/
+cccy show-list src/
+cccy show-list --format detailed src/
 ```
 
-#### `pycomplex show-summary`
+#### `cccy show-summary`
 Shows only aggregated statistics.
 
 ```bash
-pycomplex show-summary src/
+cccy show-summary src/
 ```
 
 ## GitHub Actions Integration
@@ -204,7 +204,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: mmocchi/pycomplex@v1
+      - uses: mmocchi/cccy@v1
         with:
           command: check
           paths: src/
@@ -216,7 +216,7 @@ jobs:
 
 ```yaml
 # Show detailed complexity list with JSON output
-- uses: mmocchi/pycomplex@v1
+- uses: mmocchi/cccy@v1
   with:
     command: show-list
     paths: src/ tests/
@@ -225,7 +225,7 @@ jobs:
     verbose: true
 
 # Show function-level complexity
-- uses: mmocchi/pycomplex@v1
+- uses: mmocchi/cccy@v1
   with:
     command: show-functions
     paths: src/
@@ -233,7 +233,7 @@ jobs:
     include: "*.py"
 
 # Show summary statistics only
-- uses: mmocchi/pycomplex@v1
+- uses: mmocchi/cccy@v1
   with:
     command: show-summary
     paths: src/
@@ -258,19 +258,19 @@ Add to your `.pre-commit-config.yaml`:
 
 ```yaml
 repos:
-  - repo: https://github.com/mmocchi/pycomplex
+  - repo: https://github.com/mmocchi/cccy
     rev: v1.0.0
     hooks:
-      - id: pycomplex
+      - id: cccy
         args: [--max-complexity=10]
 ```
 
 ## Configuration
 
-Create a `.pycomplex.toml` file in your project root:
+Create a `.cccy.toml` file in your project root:
 
 ```toml
-[tool.pycomplex]
+[tool.cccy]
 max_complexity = 10
 exclude = [
     "*/tests/*",

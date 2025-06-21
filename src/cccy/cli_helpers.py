@@ -6,7 +6,7 @@ from typing import Optional, Union
 import click
 
 from .analyzer import ComplexityAnalyzer
-from .config import PyComplexConfig
+from .config import CccyConfig
 from .formatters import OutputFormatter
 from .models import ComplexityResult, FileComplexityResult
 from .services import AnalyzerService
@@ -32,7 +32,7 @@ def load_and_merge_config(
         Merged configuration dictionary
 
     """
-    config = PyComplexConfig()
+    config = CccyConfig()
     return config.merge_with_cli_options(
         max_complexity=max_complexity,
         max_cognitive=max_cognitive,
@@ -186,7 +186,7 @@ def validate_required_config(
     """
     if merged_config["max_complexity"] is None:
         click.echo(
-            "Error: --max-complexity is required or must be set in pyproject.toml [tool.pycomplex] section",
+            "Error: --max-complexity is required or must be set in pyproject.toml [tool.cccy] section",
             err=True,
         )
         sys.exit(1)

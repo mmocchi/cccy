@@ -87,8 +87,8 @@ class FileComplexityResult(BaseModel):
         return self.get_status()
 
 
-class PyComplexSettings(BaseSettings):
-    """Configuration settings for pycomplex."""
+class CccySettings(BaseSettings):
+    """Configuration settings for cccy."""
 
     max_complexity: Optional[int] = Field(
         None, ge=1, description="Maximum allowed cyclomatic complexity"
@@ -114,7 +114,7 @@ class PyComplexSettings(BaseSettings):
     )
 
     model_config = SettingsConfigDict(
-        env_prefix="PYCOMPLEX_", case_sensitive=False, validate_assignment=True
+        env_prefix="CCCY_", case_sensitive=False, validate_assignment=True
     )
 
     @field_validator("status_thresholds")
@@ -171,14 +171,14 @@ class PyComplexSettings(BaseSettings):
                 raise ValueError(f"High {metric} threshold must be >= medium threshold")
 
     @classmethod
-    def from_toml_config(cls, config_data: dict) -> "PyComplexSettings":
+    def from_toml_config(cls, config_data: dict) -> "CccySettings":
         """Create settings from TOML configuration data.
 
         Args:
-            config_data: Configuration data from pyproject.toml [tool.pycomplex] section
+            config_data: Configuration data from pyproject.toml [tool.cccy] section
 
         Returns:
-            PyComplexSettings instance
+            CccySettings instance
 
         """
         # Convert kebab-case keys to snake_case for Pydantic

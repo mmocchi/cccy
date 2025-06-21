@@ -26,20 +26,20 @@ This project uses **go-task** as the task runner with **uv** for Python package 
 - `task build` - Build package with uv
 - `task clean` - Clean build artifacts
 
-### Direct pycomplex Usage
-- `uv run pycomplex show-list src/` - Show complexity for all files
-- `uv run pycomplex check --max-complexity 10 src/` - CI-friendly complexity check
-- `uv run pycomplex show-summary src/` - Show summary statistics only
-- `uv run pycomplex check` - Uses configuration from pyproject.toml
-- `uv run pycomplex show-list` - Uses configuration from pyproject.toml
-- `uv run pycomplex show-summary` - Uses configuration from pyproject.toml
+### Direct cccy Usage
+- `uv run cccy show-list src/` - Show complexity for all files
+- `uv run cccy check --max-complexity 10 src/` - CI-friendly complexity check
+- `uv run cccy show-summary src/` - Show summary statistics only
+- `uv run cccy check` - Uses configuration from pyproject.toml
+- `uv run cccy show-list` - Uses configuration from pyproject.toml
+- `uv run cccy show-summary` - Uses configuration from pyproject.toml
 
 ## Configuration
 
-pycomplex can be configured in `pyproject.toml` under the `[tool.pycomplex]` section:
+cccy can be configured in `pyproject.toml` under the `[tool.cccy]` section:
 
 ```toml
-[tool.pycomplex]
+[tool.cccy]
 # Maximum complexity thresholds
 max-complexity = 10
 max-cognitive = 7
@@ -67,7 +67,7 @@ paths = ["src/"]
 
 ## Architecture Overview
 
-**pycomplex** is a Python complexity measurement tool that analyzes code for both Cyclomatic and Cognitive complexity.
+**cccy** is a Python complexity measurement tool that analyzes code for both Cyclomatic and Cognitive complexity.
 
 ### Core Components
 

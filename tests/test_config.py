@@ -11,10 +11,13 @@ class TestPyComplexConfig:
 
     def test_init_without_config_file(self) -> None:
         """Test initialization without config file."""
+        # Arrange
         with tempfile.TemporaryDirectory() as tmpdir:
+
+            # Act
             config_manager = PyComplexConfig(Path(tmpdir) / "nonexistent.toml")
 
-            # Should use defaults
+            # Assert - Should use defaults
             assert config_manager.get_max_complexity() is None, (
                 f"Expected None for max_complexity, got {config_manager.get_max_complexity()}"
             )
@@ -30,6 +33,7 @@ class TestPyComplexConfig:
 
     def test_init_with_config_file(self) -> None:
         """Test initialization with config file."""
+        # Arrange
         config_content = """
 [tool.pycomplex]
 max-complexity = 8
@@ -43,8 +47,10 @@ paths = ["src/", "lib/"]
             f.write(config_content)
             f.flush()
 
+            # Act
             config_manager = PyComplexConfig(Path(f.name))
 
+            # Assert
             assert config_manager.get_max_complexity() == 8
             assert config_manager.get_max_cognitive() == 6
             assert config_manager.get_exclude_patterns() == [
@@ -56,11 +62,14 @@ paths = ["src/", "lib/"]
 
     def test_get_status_thresholds_default(self) -> None:
         """Test getting default status thresholds."""
+        # Arrange
         with tempfile.TemporaryDirectory() as tmpdir:
             config_manager = PyComplexConfig(Path(tmpdir) / "nonexistent.toml")
 
+            # Act
             thresholds = config_manager.get_status_thresholds()
 
+            # Assert
             expected = {
                 "medium": {"cyclomatic": 5, "cognitive": 4},
                 "high": {"cyclomatic": 10, "cognitive": 7},
@@ -189,8 +198,12 @@ max-complexity = 15
 
     def test_get_default_paths_with_current_dir(self) -> None:
         """Test getting default paths when none specified in config."""
+        # Arrange
         with tempfile.TemporaryDirectory() as tmpdir:
             config_manager = PyComplexConfig(Path(tmpdir) / "nonexistent.toml")
 
+            # Act
             paths = config_manager.get_default_paths()
+
+            # Assert
             assert paths == ["."]  # Should default to current directory

@@ -1,36 +1,28 @@
 """Simple test fixture for complexity analysis."""
 
 
-def simple_function():
+def simple_function() -> str:
     """A simple function with minimal complexity."""
     return "hello"
 
 
-def function_with_if(x):
+def function_with_if(x: int) -> str:
     """Function with an if statement."""
     if x > 0:
         return "positive"
-    else:
-        return "negative"
+    return "negative"
 
 
-def complex_function(a, b, c):
+def complex_function(a: int, b: int, c: int) -> float:
     """Function with higher complexity."""
     result = 0
 
     if a > 0:
-        if b > 0:
-            if c > 0:
-                result = a + b + c
-            else:
-                result = a + b
-        else:
-            result = a
+        result = (a + b + c if c > 0 else a + b) if b > 0 else a
+    elif b > 0:
+        result = b
     else:
-        if b > 0:
-            result = b
-        else:
-            result = 0
+        result = 0
 
     for i in range(10):
         if i % 2 == 0:
@@ -46,12 +38,12 @@ def complex_function(a, b, c):
     return result
 
 
-async def async_function():
+async def async_function() -> str:
     """An async function."""
     return await some_async_operation()
 
 
-def some_async_operation():
+def some_async_operation() -> str:
     """Mock async operation."""
     return "async_result"
 
@@ -59,11 +51,11 @@ def some_async_operation():
 class TestClass:
     """Test class with methods."""
 
-    def method_one(self):
+    def method_one(self) -> int:
         """Simple method."""
         return 1
 
-    def method_with_loops(self):
+    def method_with_loops(self) -> list[int]:
         """Method with nested loops."""
         result = []
         for i in range(5):

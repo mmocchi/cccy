@@ -1,5 +1,6 @@
 """Tests for the CLI module."""
 
+import json
 import tempfile
 from pathlib import Path
 
@@ -13,9 +14,13 @@ class TestCLI:
 
     def test_cli_help(self) -> None:
         """Test CLI help output."""
+        # Arrange
         runner = CliRunner()
+
+        # Act
         result = runner.invoke(main, ["--help"])
 
+        # Assert
         assert result.exit_code == 0, (
             f"CLI help command failed with exit code {result.exit_code}"
         )
@@ -33,20 +38,27 @@ class TestCLI:
 
     def test_cli_version(self) -> None:
         """Test CLI version output."""
+        # Arrange
         runner = CliRunner()
+
+        # Act
         result = runner.invoke(main, ["--version"])
 
+        # Assert
         assert result.exit_code == 0, (
             f"CLI version command failed with exit code {result.exit_code}"
         )
 
     def test_cli_analyze_file(self) -> None:
         """Test analyzing a single file."""
+        # Arrange
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
+        # Act
         result = runner.invoke(main, ["show-list", str(fixture_path)])
 
+        # Assert
         assert result.exit_code == 0, (
             f"show-list command failed with exit code {result.exit_code}"
         )
@@ -63,58 +75,66 @@ class TestCLI:
 
     def test_cli_analyze_directory(self) -> None:
         """Test analyzing a directory."""
+        # Arrange
         runner = CliRunner()
         fixtures_dir = Path(__file__).parent / "fixtures"
 
+        # Act
         result = runner.invoke(main, ["show-list", str(fixtures_dir)])
 
+        # Assert
         assert result.exit_code == 0
         assert "simple.py" in result.output
 
     def test_cli_json_format(self) -> None:
         """Test JSON output format."""
+        # Arrange
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
+        # Act
         result = runner.invoke(
             main, ["show-list", "--format", "json", str(fixture_path)]
         )
 
+        # Assert
         assert result.exit_code == 0, (
             f"JSON format command failed with exit code {result.exit_code}"
         )
-        # Should be valid JSON
-        import json
-
         data = json.loads(result.output)
         assert isinstance(data, list), f"Expected JSON array, got {type(data)}"
         assert len(data) >= 1, f"Expected at least 1 file result, got {len(data)}"
 
     def test_cli_csv_format(self) -> None:
         """Test CSV output format."""
+        # Arrange
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
+        # Act
         result = runner.invoke(
             main, ["show-list", "--format", "csv", str(fixture_path)]
         )
 
+        # Assert
         assert result.exit_code == 0
         lines = result.output.strip().split("\n")
-        # Should have header + data rows
         assert len(lines) >= 2
         assert "file_path" in lines[0]
         assert "function_name" in lines[0]
 
     def test_cli_detailed_format(self) -> None:
         """Test detailed table format."""
+        # Arrange
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
+        # Act
         result = runner.invoke(
             main, ["show-list", "--format", "detailed", str(fixture_path)]
         )
 
+        # Assert
         assert result.exit_code == 0
         assert "simple.py" in result.output
         assert "Function" in result.output
@@ -123,23 +143,25 @@ class TestCLI:
 
     def test_cli_with_max_complexity(self) -> None:
         """Test CLI with max complexity threshold."""
+        # Arrange
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
-        # Set very low threshold to trigger failure
+        # Act - Set very low threshold to trigger failure
         result = runner.invoke(
             main, ["check", "--max-complexity", "1", str(fixture_path)]
         )
 
-        # Should exit with error code due to complex functions
+        # Assert - Should exit with error code due to complex functions
         assert result.exit_code == 1
 
     def test_cli_with_high_max_complexity(self) -> None:
         """Test CLI with high max complexity threshold."""
+        # Arrange
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
-        # Set high threshold that shouldn't trigger failure
+        # Act - Set high threshold that shouldn't trigger failure
         result = runner.invoke(
             main,
             [
@@ -152,26 +174,32 @@ class TestCLI:
             ],
         )
 
+        # Assert
         assert result.exit_code == 0
 
     def test_cli_verbose_output(self) -> None:
         """Test verbose output."""
+        # Arrange
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
+        # Act
         result = runner.invoke(main, ["show-list", "--verbose", str(fixture_path)])
 
+        # Assert
         assert result.exit_code == 0
-        # Verbose messages go to stderr
         assert "Analyzing:" in result.stderr or "Analyzing:" in result.output
 
     def test_cli_summary_output(self) -> None:
         """Test summary output."""
+        # Arrange
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
+        # Act
         result = runner.invoke(main, ["show-summary", str(fixture_path)])
 
+        # Assert
         assert result.exit_code == 0
         assert "Analyzed" in result.output
         assert "files" in result.output
@@ -179,43 +207,44 @@ class TestCLI:
 
     def test_cli_exclude_patterns(self) -> None:
         """Test exclude patterns."""
+        # Arrange
         runner = CliRunner()
 
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
-
-            # Create test files
             (tmpdir_path / "include.py").write_text("def test(): pass")
             (tmpdir_path / "exclude.py").write_text("def test(): pass")
 
+            # Act
             result = runner.invoke(
                 main, ["show-list", "--exclude", "exclude.py", str(tmpdir_path)]
             )
 
+            # Assert
             assert result.exit_code == 0
             assert "include.py" in result.output
             assert "exclude.py" not in result.output
 
     def test_cli_no_recursive(self) -> None:
         """Test non-recursive directory analysis."""
+        # Arrange
         runner = CliRunner()
 
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
             subdir = tmpdir_path / "subdir"
             subdir.mkdir()
-
-            # Create files in different levels
             (tmpdir_path / "root.py").write_text("def root(): pass")
             (subdir / "sub.py").write_text("def sub(): pass")
 
+            # Act
             result = runner.invoke(
                 main, ["show-list", "--no-recursive", str(tmpdir_path)]
             )
 
+            # Assert
             assert result.exit_code == 0
             assert "root.py" in result.output
-            # Should not include subdirectory files
             assert "sub.py" not in result.output
 
     def test_cli_nonexistent_file(self) -> None:
@@ -297,25 +326,24 @@ class TestCLI:
 
     def test_cli_show_functions_json(self) -> None:
         """Test show-functions with JSON format."""
+        # Arrange
         runner = CliRunner()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
+        # Act
         result = runner.invoke(
             main, ["show-functions", "--format", "json", str(fixture_path)]
         )
 
+        # Assert
         assert result.exit_code == 0, (
             f"show-functions JSON command failed with exit code {result.exit_code}"
         )
-        # Should be valid JSON
-        import json
-
         data = json.loads(result.output)
         assert isinstance(data, list), (
             f"Expected JSON array for functions, got {type(data)}"
         )
-        # Each item should be a function
-        if data:  # If there are functions in the file
+        if data:
             function_item = data[0]
             assert "file_path" in function_item, (
                 "Missing 'file_path' in function JSON output"

@@ -122,12 +122,8 @@ ignore = [
 "tests/**" = [
     "D401",    # first line should be in imperative mood
     "PLR2004", # magic value comparison
-    "S101",    # assert usage (normal in tests)
-    "PLC0415", # import at top-level (common in test functions)
 ]
-"tests/fixtures/**" = [
-    "ALL",     # test fixtures can ignore all rules
-]
+
 
 [tool.ruff.format]
 quote-style = "double"

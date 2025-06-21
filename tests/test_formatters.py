@@ -54,18 +54,26 @@ class TestOutputFormatter:
 
     def test_format_table_empty(self) -> None:
         """Test formatting empty results as table."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_table([])
 
+        # Assert
         assert result == "No Python files analyzed.", (
             f"Expected empty message, got: {result}"
         )
 
     def test_format_table_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as table."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_table(sample_results)
 
+        # Assert
         assert "File" in result, "Table header 'File' not found in output"
         assert "Cyclomatic" in result, "Table header 'Cyclomatic' not found in output"
         assert "Cognitive" in result, "Table header 'Cognitive' not found in output"
@@ -79,16 +87,24 @@ class TestOutputFormatter:
 
     def test_format_detailed_table_empty(self) -> None:
         """Test formatting empty results as detailed table."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_detailed_table([])
 
+        # Assert
         assert result == "No Python files analyzed."
 
     def test_format_detailed_table_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as detailed table."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_detailed_table(sample_results)
 
+        # Assert
         assert "simple.py" in result
         assert "complex.py" in result
         assert "simple_func" in result
@@ -99,6 +115,7 @@ class TestOutputFormatter:
 
     def test_format_detailed_table_no_functions(self) -> None:
         """Test formatting file with no functions as detailed table."""
+        # Arrange
         result_no_funcs = FileComplexityResult(
             file_path="empty.py",
             functions=[],
@@ -107,28 +124,37 @@ class TestOutputFormatter:
             max_cyclomatic=0,
             max_cognitive=0,
         )
-
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_detailed_table([result_no_funcs])
 
+        # Assert
         assert "empty.py" in result
         assert "No functions found." in result
 
     def test_format_json_empty(self) -> None:
         """Test formatting empty results as JSON."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_json([])
 
+        # Assert
         parsed = json.loads(result)
         assert parsed == []
 
     def test_format_json_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as JSON."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_json(sample_results)
 
+        # Assert
         parsed = json.loads(result)
-
         assert len(parsed) == 2, f"Expected 2 files in JSON output, got {len(parsed)}"
         assert parsed[0]["file_path"] == "simple.py", (
             f"Expected first file to be 'simple.py', got {parsed[0]['file_path']}"
@@ -137,7 +163,6 @@ class TestOutputFormatter:
             f"Expected second file to be 'complex.py', got {parsed[1]['file_path']}"
         )
 
-        # Check first file structure
         first_file = parsed[0]
         assert "functions" in first_file, "Missing 'functions' key in JSON file output"
         assert "totals" in first_file, "Missing 'totals' key in JSON file output"
@@ -146,7 +171,6 @@ class TestOutputFormatter:
         )
         assert "status" in first_file, "Missing 'status' key in JSON file output"
 
-        # Check function structure
         first_function = first_file["functions"][0]
         assert first_function["name"] == "simple_func", (
             f"Expected function name 'simple_func', got {first_function['name']}"
@@ -163,32 +187,33 @@ class TestOutputFormatter:
 
     def test_format_csv_empty(self) -> None:
         """Test formatting empty results as CSV."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_csv([])
 
+        # Assert
         lines = result.strip().split("\n")
-        # Should only have header
         assert len(lines) == 1
         assert "file_path" in lines[0]
         assert "function_name" in lines[0]
 
     def test_format_csv_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as CSV."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_csv(sample_results)
 
+        # Assert
         lines = result.strip().split("\n")
-
-        # Header + 2 data rows
         assert len(lines) == 3
-
-        # Check header
         header = lines[0]
         assert "file_path" in header
         assert "function_name" in header
         assert "cyclomatic_complexity" in header
-
-        # Check data rows
         assert "simple.py" in lines[1]
         assert "simple_func" in lines[1]
         assert "complex.py" in lines[2]
@@ -196,6 +221,7 @@ class TestOutputFormatter:
 
     def test_format_csv_no_functions(self) -> None:
         """Test formatting file with no functions as CSV."""
+        # Arrange
         result_no_funcs = FileComplexityResult(
             file_path="empty.py",
             functions=[],
@@ -204,31 +230,38 @@ class TestOutputFormatter:
             max_cyclomatic=0,
             max_cognitive=0,
         )
-
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_csv([result_no_funcs])
 
+        # Assert
         lines = result.strip().split("\n")
-
-        # Header + 1 data row (empty function data)
         assert len(lines) == 2
         assert "empty.py" in lines[1]
-        # Should have empty function name
         values = lines[1].split(",")
         assert values[1] == ""  # empty function name
 
     def test_format_summary_empty(self) -> None:
         """Test formatting empty results as summary."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_summary([])
 
+        # Assert
         assert result == "No Python files analyzed."
 
     def test_format_summary_with_results(self, sample_results: List[FileComplexityResult]) -> None:
         """Test formatting results as summary."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_summary(sample_results)
 
+        # Assert
         assert "Analyzed 2 files" in result
         assert "functions" in result
         assert "Status distribution" in result
@@ -238,6 +271,7 @@ class TestOutputFormatter:
 
     def test_format_summary_with_high_complexity(self) -> None:
         """Test formatting summary with high complexity files."""
+        # Arrange
         high_complexity_func = ComplexityResult(
             name="very_complex_func",
             cyclomatic_complexity=15,
@@ -245,7 +279,6 @@ class TestOutputFormatter:
             lineno=30,
             col_offset=0,
         )
-
         high_complexity_result = FileComplexityResult(
             file_path="very_complex.py",
             functions=[high_complexity_func],
@@ -254,10 +287,12 @@ class TestOutputFormatter:
             max_cyclomatic=15,
             max_cognitive=12,
         )
-
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_summary([high_complexity_result])
 
+        # Assert
         assert "HIGH: 1" in result
         assert "High complexity files:" in result
         assert "very_complex.py" in result
@@ -266,9 +301,13 @@ class TestOutputFormatter:
 
     def test_format_functions_json_empty(self) -> None:
         """Test formatting empty results as functions JSON."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_functions_json([])
 
+        # Assert
         parsed = json.loads(result)
         assert parsed == []
 
@@ -345,11 +384,14 @@ class TestOutputFormatter:
 
     def test_format_functions_csv_empty(self) -> None:
         """Test formatting empty results as functions CSV."""
+        # Arrange
         formatter = OutputFormatter()
+
+        # Act
         result = formatter.format_functions_csv([])
 
+        # Assert
         lines = result.strip().split("\n")
-        # Should only have header
         assert len(lines) == 1
         header = lines[0]
         assert "file_path" in header

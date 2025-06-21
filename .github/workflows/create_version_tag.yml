@@ -88,6 +88,7 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          verbose: true
 
       - name: Create GitHub Release Draft
         uses: actions/create-release@v1

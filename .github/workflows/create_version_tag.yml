@@ -91,25 +91,25 @@ jobs:
           verbose: true
 
       - name: Create GitHub Release Draft
-        uses: actions/create-release@v1
+        run: |
+          gh release create "v${{ steps.get_version.outputs.version }}" \
+            --title "Release v${{ steps.get_version.outputs.version }}" \
+            --draft \
+            --notes "$(cat <<'EOF'
+          ## Changes in v${{ steps.get_version.outputs.version }}
+          
+          <!-- Add release notes here before publishing -->
+          
+          ## Installation
+          
+          \`\`\`bash
+          pip install pycomplex==${{ steps.get_version.outputs.version }}
+          \`\`\`
+          
+          ## Full Changelog
+          
+          See the [commit history](https://github.com/${{ github.repository }}/compare/v${{ steps.get_version.outputs.version }}) for detailed changes.
+          EOF
+          )"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.get_version.outputs.version }}
-          release_name: Release v${{ steps.get_version.outputs.version }}
-          draft: true
-          prerelease: false
-          body: |
-            ## Changes in v${{ steps.get_version.outputs.version }}
-            
-            <!-- Add release notes here before publishing -->
-            
-            ## Installation
-            
-            ```bash
-            pip install pycomplex==${{ steps.get_version.outputs.version }}
-            ```
-            
-            ## Full Changelog
-            
-            See the [commit history](https://github.com/${{ github.repository }}/compare/v${{ steps.get_version.outputs.version }}) for detailed changes.

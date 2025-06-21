@@ -21,31 +21,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          python-version: "3.11"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-
-      - name: Install Task
-        uses: arduino/setup-task@v2
-        with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install dependencies
-        run: uv sync --dev
-
-      - name: Run tests and checks
-        run: |
-          uv run task test
-          uv run task lint
-          uv run task complexity-check
-
-      - name: Build package
-        run: uv build
+          name: python-package-distributions
+          path: dist/
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

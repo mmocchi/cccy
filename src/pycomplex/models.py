@@ -121,33 +121,54 @@ class PyComplexSettings(BaseSettings):
     @classmethod
     def validate_status_thresholds(cls, v: dict) -> dict[str, dict[str, int]]:
         """Validate and merge status thresholds with defaults."""
-        # Start with defaults
-        defaults = {
+        defaults = cls._get_default_thresholds()
+        result = cls._merge_thresholds_with_defaults(defaults, v)
+        cls._validate_threshold_ordering(result)
+        return result
+
+    @classmethod
+    def _get_default_thresholds(cls) -> dict[str, dict[str, int]]:
+        """Get default threshold values."""
+        return {
             "medium": {"cyclomatic": 5, "cognitive": 4},
             "high": {"cyclomatic": 10, "cognitive": 7},
         }
 
-        # Merge user input with defaults
+    @classmethod
+    def _merge_thresholds_with_defaults(
+        cls, defaults: dict[str, dict[str, int]], user_input: dict
+    ) -> dict[str, dict[str, int]]:
+        """Merge user input with default thresholds."""
         result = defaults.copy()
         for level in ["medium", "high"]:
-            if level in v:
-                for metric in ["cyclomatic", "cognitive"]:
-                    if metric in v[level]:
-                        if (
-                            not isinstance(v[level][metric], int)
-                            or v[level][metric] < 0
-                        ):
-                            raise ValueError(
-                                f"{metric} threshold for {level} must be a non-negative integer"
-                            )
-                        result[level][metric] = v[level][metric]
+            if level in user_input:
+                cls._update_level_thresholds(result, user_input, level)
+        return result
 
-        # Validate that high thresholds are >= medium thresholds
+    @classmethod
+    def _update_level_thresholds(
+        cls, result: dict[str, dict[str, int]], user_input: dict, level: str
+    ) -> None:
+        """Update thresholds for a specific level."""
+        for metric in ["cyclomatic", "cognitive"]:
+            if metric in user_input[level]:
+                cls._validate_threshold_value(user_input[level][metric], metric, level)
+                result[level][metric] = user_input[level][metric]
+
+    @classmethod
+    def _validate_threshold_value(cls, value: int, metric: str, level: str) -> None:
+        """Validate a single threshold value."""
+        if not isinstance(value, int) or value < 0:
+            raise ValueError(
+                f"{metric} threshold for {level} must be a non-negative integer"
+            )
+
+    @classmethod
+    def _validate_threshold_ordering(cls, result: dict[str, dict[str, int]]) -> None:
+        """Validate that high thresholds are >= medium thresholds."""
         for metric in ["cyclomatic", "cognitive"]:
             if result["high"][metric] < result["medium"][metric]:
                 raise ValueError(f"High {metric} threshold must be >= medium threshold")
-
-        return result
 
     @classmethod
     def from_toml_config(cls, config_data: dict) -> "PyComplexSettings":

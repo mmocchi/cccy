@@ -6,11 +6,16 @@ on:
 
 permissions:
   contents: read
+  actions: read
+  metadata: read
 
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
+      actions: read
+      metadata: read
       id-token: write
     steps:
       - name: Checkout repository

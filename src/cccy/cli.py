@@ -27,13 +27,13 @@ def create_banner() -> str:
     max_width = 57  # Available width inside the box
     version_text = f"v{version}"
     # Position version on the right side of the ascii art line
-    padding = max_width - 25 - len(version_text) # 25 is width of ascii art
+    padding = max_width - 25 - len(version_text)  # 25 is width of ascii art
     padding = max(padding, 1)
 
     return f"""┌─────────────────────────────────────────────────────────┐
 │                                                         │
 │  ██▀ ██▀ ██▀ █▄█                                        │
-│  ██▄ ██▄ ██▄  █     {version_text}{' ' * padding}    │
+│  ██▄ ██▄ ██▄  █     {version_text}{" " * padding}    │
 │                                                         │
 │  Python Cycromatic and Cognitive Complexity Analyzer    │
 │                                                         │
@@ -43,11 +43,11 @@ def create_banner() -> str:
 @click.group(invoke_without_command=True)
 @click.pass_context
 @click.version_option()
-def main(ctx: click.Context) -> None:
+def main(ctx: click.Context) -> None:  # noqa: D103
     if ctx.invoked_subcommand is None:
         # Display custom banner and help
         banner = create_banner()
-        click.echo(click.style(banner, fg='cyan', bold=True))
+        click.echo(click.style(banner, fg="cyan", bold=True))
         click.echo()
         click.echo()
         click.echo("Pythonコードの循環的複雑度と認知的複雑度を解析します。")

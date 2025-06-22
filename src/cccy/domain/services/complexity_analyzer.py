@@ -4,11 +4,11 @@ import ast
 from pathlib import Path
 from typing import Optional, Union
 
-from cccy.complexity_calculators import (
+from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
+from cccy.infrastructure.calculators.concrete_calculators import (
     CognitiveComplexityCalculator,
     CyclomaticComplexityCalculator,
 )
-from cccy.models import ComplexityResult, FileComplexityResult
 
 
 class ComplexityAnalyzer:

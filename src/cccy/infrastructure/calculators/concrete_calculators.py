@@ -1,37 +1,15 @@
-"""プラグイン対応の複雑度計算戦略のための抽象複雑度カルキュレーター。"""
+"""Concrete complexity calculator implementations."""
 
 import ast
 import logging
-from abc import ABC, abstractmethod
 from typing import ClassVar, Union
 
 import mccabe
 from cognitive_complexity.api import get_cognitive_complexity
 
+from cccy.application.interfaces.calculators import ComplexityCalculator
+
 logger = logging.getLogger(__name__)
-
-
-class ComplexityCalculator(ABC):
-    """複雑度カルキュレーターの抽象ベースクラス。"""
-
-    @abstractmethod
-    def calculate(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> int:
-        """関数ノードの複雑度を計算します。
-
-        Args:
-            node: 関数を表すAST要素
-
-        Returns:
-            複雑度スコア
-
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        """この複雑度メトリクスの名前を返します。"""
-        pass
 
 
 class CyclomaticComplexityCalculator(ComplexityCalculator):

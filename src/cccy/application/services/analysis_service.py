@@ -6,8 +6,8 @@ from typing import Optional
 
 import click
 
-from cccy.analyzer import ComplexityAnalyzer
-from cccy.models import FileComplexityResult
+from cccy.domain.entities.complexity import FileComplexityResult
+from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
 
 logger = logging.getLogger(__name__)
 

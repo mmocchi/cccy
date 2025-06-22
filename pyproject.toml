@@ -35,7 +35,7 @@ dependencies = [
 ]
 
 [project.scripts]
-cccy = "cccy.cli:main"
+cccy = "cccy.presentation.cli.main:main"
 
 [project.urls]
 Homepage = "https://github.com/mmocchi/cccy"

@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-from cccy.analyzer import ComplexityAnalyzer
-from cccy.models import ComplexityResult, FileComplexityResult
-from cccy.services import AnalyzerService
+from cccy.application.services.analysis_service import AnalyzerService
+from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
+from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
 
 
 class TestAnalyzerService:
@@ -122,7 +122,7 @@ class TestAnalyzerService:
         captured = capsys.readouterr()
         assert "Analyzing:" in captured.err
 
-    @patch("cccy.services.Path.exists")
+    @patch("cccy.application.services.analysis_service.Path.exists")
     def test_handle_permission_error(self, mock_exists: MagicMock, capsys: Any) -> None:
         """Test handling permission errors."""
         mock_exists.return_value = True
@@ -140,7 +140,7 @@ class TestAnalyzerService:
             captured = capsys.readouterr()
             assert "Error: Permission denied" in captured.err
 
-    @patch("cccy.services.Path.exists")
+    @patch("cccy.application.services.analysis_service.Path.exists")
     def test_handle_general_error(self, mock_exists: MagicMock, capsys: Any) -> None:
         """Test handling general errors."""
         mock_exists.return_value = True

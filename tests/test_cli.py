@@ -6,7 +6,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from cccy.cli import main
+from cccy.presentation.cli.main import main
 
 
 class TestCLI:

@@ -4,12 +4,12 @@ from typing import Any, Union, cast
 
 import pytest
 
-from cccy.cli_helpers import (
+from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
+from cccy.infrastructure.formatters.output import OutputFormatter
+from cccy.presentation.cli.helpers import (
     format_and_display_output,
     validate_required_config,
 )
-from cccy.formatters import OutputFormatter
-from cccy.models import ComplexityResult, FileComplexityResult
 
 
 class TestCliHelpers:

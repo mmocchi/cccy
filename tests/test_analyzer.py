@@ -3,8 +3,8 @@
 import tempfile
 from pathlib import Path
 
-from cccy.analyzer import ComplexityAnalyzer
-from cccy.models import ComplexityResult, FileComplexityResult
+from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
+from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
 
 
 class TestComplexityAnalyzer:

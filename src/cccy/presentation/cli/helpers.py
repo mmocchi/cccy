@@ -5,11 +5,11 @@ from typing import Optional, Union
 
 import click
 
-from cccy.analyzer import ComplexityAnalyzer
-from cccy.config import CccyConfig
-from cccy.formatters import OutputFormatter
-from cccy.models import ComplexityResult, FileComplexityResult
-from cccy.services import AnalyzerService
+from cccy.application.services.analysis_service import AnalyzerService
+from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
+from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
+from cccy.infrastructure.config.manager import CccyConfig
+from cccy.infrastructure.formatters.output import OutputFormatter
 
 
 def load_and_merge_config(

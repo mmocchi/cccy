@@ -3,7 +3,7 @@ description: 'Automatically retry failed workflow jobs with configurable filters
 
 inputs:
   workflow_config:
-    description: 'ワークフロー別設定 (JSON形式: {"workflow_name": {"branches": ["main"], "jobs": ["test"], "max_retries": 3}})'
+    description: 'ワークフロー別設定 (YAML形式)'
     required: true
   github_token:
     description: 'GitHub token for API access'
@@ -36,16 +36,21 @@ runs:
       id: parse-config
       shell: bash
       run: |
-        WORKFLOW_CONFIG="${{ inputs.workflow_config }}"
+        # YAML設定を一時ファイルに保存
+        cat << 'EOF' > /tmp/config.yml
+        ${{ inputs.workflow_config }}
+        EOF
+        
         CURRENT_WORKFLOW="${{ steps.workflow-info.outputs.workflow_name }}"
         
         echo "Parsing workflow configuration for: $CURRENT_WORKFLOW"
-        echo "Workflow config: $WORKFLOW_CONFIG"
+        echo "Workflow config:"
+        cat /tmp/config.yml
         
-        # 現在のワークフローに対する設定を取得
-        CONFIG_BRANCHES=$(echo "$WORKFLOW_CONFIG" | jq -r --arg workflow "$CURRENT_WORKFLOW" '.[$workflow].branches // empty | join(",")')
-        CONFIG_JOBS=$(echo "$WORKFLOW_CONFIG" | jq -r --arg workflow "$CURRENT_WORKFLOW" '.[$workflow].jobs // empty | join(",")')
-        CONFIG_MAX_RETRIES=$(echo "$WORKFLOW_CONFIG" | jq -r --arg workflow "$CURRENT_WORKFLOW" '.[$workflow].max_retries // 3')
+        # yqを使って現在のワークフローに対する設定を取得
+        CONFIG_BRANCHES=$(yq eval ".\"$CURRENT_WORKFLOW\".branches // [] | join(\",\")" /tmp/config.yml)
+        CONFIG_JOBS=$(yq eval ".\"$CURRENT_WORKFLOW\".jobs // [] | join(\",\")" /tmp/config.yml)
+        CONFIG_MAX_RETRIES=$(yq eval ".\"$CURRENT_WORKFLOW\".max_retries // 3" /tmp/config.yml)
         
         echo "Config branches for $CURRENT_WORKFLOW: $CONFIG_BRANCHES"
         echo "Config jobs for $CURRENT_WORKFLOW: $CONFIG_JOBS"

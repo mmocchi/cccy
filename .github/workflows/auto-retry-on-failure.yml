@@ -22,11 +22,10 @@ jobs:
         uses: ./.github/actions/auto-retry-failed-jobs
         with:
           workflow_config: |
-            {
-              "Test": {
-                "branches": ["main"],
-                "jobs": ["test"],
-                "max_retries": 2
-              }
-            }
+            Test:
+              branches:
+                - main
+              jobs:
+                - test
+              max_retries: 2
           github_token: ${{ secrets.GITHUB_TOKEN }}

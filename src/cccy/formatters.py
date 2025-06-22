@@ -6,21 +6,21 @@ from io import StringIO
 
 from tabulate import tabulate
 
-from .models import FileComplexityResult
+from cccy.models import FileComplexityResult
 
 
 class OutputFormatter:
-    """Formats complexity analysis results for output."""
+    """複雑度解析結果の出力フォーマッター。"""
 
     @staticmethod
     def format_table(results: list[FileComplexityResult]) -> str:
-        """Format results as a table.
+        """結果をテーブルとしてフォーマットします。
 
         Args:
-            results: List of file complexity results
+            results: ファイル複雑度結果のリスト
 
         Returns:
-            Formatted table string
+            フォーマットされたテーブル文字列
 
         """
         if not results:
@@ -43,13 +43,13 @@ class OutputFormatter:
 
     @staticmethod
     def format_detailed_table(results: list[FileComplexityResult]) -> str:
-        """Format results as a detailed table with function-level information.
+        """関数レベル情報を含む詳細テーブルとして結果をフォーマットします。
 
         Args:
-            results: List of file complexity results
+            results: ファイル複雑度結果のリスト
 
         Returns:
-            Formatted detailed table string
+            フォーマットされた詳細テーブル文字列
 
         """
         if not results:
@@ -87,13 +87,13 @@ class OutputFormatter:
 
     @staticmethod
     def format_json(results: list[FileComplexityResult]) -> str:
-        """Format results as JSON using Pydantic model serialization.
+        """Pydanticモデルシリアライゼーションを使用して結果をJSONとしてフォーマットします。
 
         Args:
-            results: List of file complexity results
+            results: ファイル複雑度結果のリスト
 
         Returns:
-            JSON formatted string
+            JSONフォーマットされた文字列
 
         """
         # Use Pydantic's model_dump and transform for legacy format compatibility
@@ -135,13 +135,13 @@ class OutputFormatter:
 
     @staticmethod
     def format_csv(results: list[FileComplexityResult]) -> str:
-        """Format results as CSV.
+        """結果をCSVとしてフォーマットします。
 
         Args:
-            results: List of file complexity results
+            results: ファイル複雑度結果のリスト
 
         Returns:
-            CSV formatted string
+            CSVフォーマットされた文字列
 
         """
         output = StringIO()
@@ -196,13 +196,13 @@ class OutputFormatter:
 
     @staticmethod
     def format_functions_json(results: list[FileComplexityResult]) -> str:
-        """Format function-level results as JSON.
+        """関数レベルの結果をJSONとしてフォーマットします。
 
         Args:
-            results: List of file complexity results
+            results: ファイル複雑度結果のリスト
 
         Returns:
-            JSON formatted string focused on functions
+            関数に焦点を当てたJSONフォーマットされた文字列
 
         """
         data = []
@@ -225,13 +225,13 @@ class OutputFormatter:
 
     @staticmethod
     def format_functions_csv(results: list[FileComplexityResult]) -> str:
-        """Format function-level results as CSV.
+        """関数レベルの結果をCSVとしてフォーマットします。
 
         Args:
-            results: List of file complexity results
+            results: ファイル複雑度結果のリスト
 
         Returns:
-            CSV formatted string focused on functions
+            関数に焦点を当てたCSVフォーマットされた文字列
 
         """
         output = StringIO()
@@ -269,13 +269,13 @@ class OutputFormatter:
 
     @staticmethod
     def format_summary(results: list[FileComplexityResult]) -> str:
-        """Format a summary of the analysis results.
+        """解析結果の要約をフォーマットします。
 
         Args:
-            results: List of file complexity results
+            results: ファイル複雑度結果のリスト
 
         Returns:
-            Summary string
+            要約文字列
 
         """
         if not results:

@@ -5,14 +5,14 @@ from typing import Optional, Protocol, Union
 
 from pydantic import ValidationError
 
-from .models import CccySettings
+from cccy.models import CccySettings
 
 
 class TomlLoader(Protocol):
-    """Protocol for TOML loading functionality."""
+    """TOML読み込み機能のプロトコル。"""
 
     def load(self, fp: object) -> dict[str, object]:
-        """Load TOML data from file pointer."""
+        """ファイルポインターからTOMLデータを読み込みます。"""
         ...
 
 
@@ -31,20 +31,20 @@ except ImportError:
 
 
 class CccyConfig:
-    """Configuration loader for cccy."""
+    """cccyの設定ローダー。"""
 
     def __init__(self, config_path: Optional[Path] = None) -> None:
-        """Initialize configuration loader.
+        """設定ローダーを初期化します。
 
         Args:
-            config_path: Path to pyproject.toml file. If None, searches for it.
+            config_path: pyproject.tomlファイルのパス。Noneの場合は検索します。
 
         """
         self.config_path = config_path or self._find_config_file()
         self._settings: Optional[CccySettings] = None
 
     def _find_config_file(self) -> Optional[Path]:
-        """Find pyproject.toml file in current directory or parent directories."""
+        """現在のディレクトリまたは親ディレクトリでpyproject.tomlファイルを検索します。"""
         current_dir = Path.cwd()
 
         # Look in current directory and parents
@@ -56,7 +56,7 @@ class CccyConfig:
         return None
 
     def _load_config(self) -> dict[str, object]:
-        """Load configuration from pyproject.toml file."""
+        """pyproject.tomlファイルから設定を読み込みます。"""
         if not self.config_path or not self.config_path.exists():
             return {}
 
@@ -78,7 +78,7 @@ class CccyConfig:
             return {}
 
     def _get_settings(self) -> CccySettings:
-        """Get Pydantic settings instance."""
+        """Pydantic設定インスタンスを取得します。"""
         if self._settings is None:
             config_data = self._load_config()
             try:
@@ -89,27 +89,27 @@ class CccyConfig:
         return self._settings
 
     def get_max_complexity(self) -> Optional[int]:
-        """Get maximum cyclomatic complexity threshold."""
+        """最大循環的複雑度闾値を取得します。"""
         return self._get_settings().max_complexity
 
     def get_max_cognitive(self) -> Optional[int]:
-        """Get maximum cognitive complexity threshold."""
+        """最大認知的複雑度闾値を取得します。"""
         return self._get_settings().max_cognitive
 
     def get_exclude_patterns(self) -> list[str]:
-        """Get file patterns to exclude."""
+        """除外するファイルパターンを取得します。"""
         return self._get_settings().exclude
 
     def get_include_patterns(self) -> list[str]:
-        """Get file patterns to include."""
+        """含めるファイルパターンを取得します。"""
         return self._get_settings().include
 
     def get_default_paths(self) -> list[str]:
-        """Get default paths to analyze."""
+        """解析するデフォルトパスを取得します。"""
         return self._get_settings().paths
 
     def get_status_thresholds(self) -> dict[str, dict[str, int]]:
-        """Get status classification thresholds."""
+        """ステータス分類闾値を取得します。"""
         return self._get_settings().status_thresholds
 
     def merge_with_cli_options(
@@ -120,7 +120,7 @@ class CccyConfig:
         include: Optional[list[str]] = None,
         paths: Optional[list[str]] = None,
     ) -> dict[str, Union[str, int, list[str], None]]:
-        """Merge configuration with CLI options, CLI takes precedence."""
+        """設定をCLIオプションとマージし、CLIが優先されます。"""
         settings = self._get_settings()
         return {
             "max_complexity": max_complexity or settings.max_complexity,

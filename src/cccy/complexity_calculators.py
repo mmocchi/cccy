@@ -1,4 +1,4 @@
-"""Abstract complexity calculators for pluggable complexity calculation strategies."""
+"""プラグイン対応の複雑度計算戦略のための抽象複雑度カルキュレーター。"""
 
 import ast
 import logging
@@ -12,17 +12,17 @@ logger = logging.getLogger(__name__)
 
 
 class ComplexityCalculator(ABC):
-    """Abstract base class for complexity calculators."""
+    """複雑度カルキュレーターの抽象ベースクラス。"""
 
     @abstractmethod
     def calculate(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> int:
-        """Calculate complexity for a function node.
+        """関数ノードの複雑度を計算します。
 
         Args:
-            node: AST node representing a function
+            node: 関数を表すAST要素
 
         Returns:
-            Complexity score
+            複雑度スコア
 
         """
         pass
@@ -30,24 +30,24 @@ class ComplexityCalculator(ABC):
     @property
     @abstractmethod
     def name(self) -> str:
-        """Return the name of this complexity metric."""
+        """この複雑度メトリクスの名前を返します。"""
         pass
 
 
 class CyclomaticComplexityCalculator(ComplexityCalculator):
-    """Calculator for McCabe cyclomatic complexity."""
+    """McCabe循環的複雑度のカルキュレーター。"""
 
     def calculate(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> int:
-        """Calculate cyclomatic complexity for a function node.
+        """関数ノードの循環的複雑度を計算します。
 
         Args:
-            node: AST node representing a function
+            node: 関数を表すAST要素
 
         Returns:
-            Cyclomatic complexity score
+            循環的複雑度スコア
 
         Raises:
-            ComplexityCalculationError: If calculation fails and strict mode is enabled
+            ComplexityCalculationError: 計算が失敗し、厳密モードが有効な場合
 
         """
         try:
@@ -72,24 +72,24 @@ class CyclomaticComplexityCalculator(ComplexityCalculator):
 
     @property
     def name(self) -> str:
-        """Return the name of this complexity metric."""
+        """この複雑度メトリクスの名前を返します。"""
         return "cyclomatic"
 
 
 class CognitiveComplexityCalculator(ComplexityCalculator):
-    """Calculator for cognitive complexity."""
+    """認知的複雑度のカルキュレーター。"""
 
     def calculate(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> int:
-        """Calculate cognitive complexity for a function node.
+        """関数ノードの認知的複雑度を計算します。
 
         Args:
-            node: AST node representing a function
+            node: 関数を表すAST要素
 
         Returns:
-            Cognitive complexity score
+            認知的複雑度スコア
 
         Raises:
-            ComplexityCalculationError: If calculation fails and strict mode is enabled
+            ComplexityCalculationError: 計算が失敗し、厳密モードが有効な場合
 
         """
         try:
@@ -103,12 +103,12 @@ class CognitiveComplexityCalculator(ComplexityCalculator):
 
     @property
     def name(self) -> str:
-        """Return the name of this complexity metric."""
+        """この複雑度メトリクスの名前を返します。"""
         return "cognitive"
 
 
 class ComplexityCalculatorFactory:
-    """Factory for creating complexity calculators."""
+    """複雑度カルキュレーターを作成するファクトリー。"""
 
     _calculators: ClassVar[dict[str, type[ComplexityCalculator]]] = {
         "cyclomatic": CyclomaticComplexityCalculator,
@@ -117,16 +117,16 @@ class ComplexityCalculatorFactory:
 
     @classmethod
     def create(cls, calculator_type: str) -> ComplexityCalculator:
-        """Create a complexity calculator of the specified type.
+        """指定されたタイプの複雑度カルキュレーターを作成します。
 
         Args:
-            calculator_type: Type of calculator to create ("cyclomatic" or "cognitive")
+            calculator_type: 作成するカルキュレーターのタイプ("cyclomatic"または"cognitive")
 
         Returns:
-            ComplexityCalculator instance
+            ComplexityCalculatorインスタンス
 
         Raises:
-            ValueError: If calculator_type is not supported
+            ValueError: calculator_typeがサポートされていない場合
 
         """
         if calculator_type not in cls._calculators:
@@ -140,10 +140,10 @@ class ComplexityCalculatorFactory:
 
     @classmethod
     def get_available_types(cls) -> list[str]:
-        """Get list of available calculator types.
+        """利用可能なカルキュレータータイプのリストを取得します。
 
         Returns:
-            List of available calculator type names
+            利用可能なカルキュレータータイプ名のリスト
 
         """
         return list(cls._calculators.keys())
@@ -152,14 +152,14 @@ class ComplexityCalculatorFactory:
     def register_calculator(
         cls, name: str, calculator_class: type[ComplexityCalculator]
     ) -> None:
-        """Register a new complexity calculator type.
+        """新しい複雑度カルキュレータータイプを登録します。
 
         Args:
-            name: Name of the calculator type
-            calculator_class: Calculator class (must inherit from ComplexityCalculator)
+            name: カルキュレータータイプの名前
+            calculator_class: カルキュレータークラス(ComplexityCalculatorを継承する必要があります)
 
         Raises:
-            TypeError: If calculator_class doesn't inherit from ComplexityCalculator
+            TypeError: calculator_classがComplexityCalculatorを継承していない場合
 
         """
         if not issubclass(calculator_class, ComplexityCalculator):

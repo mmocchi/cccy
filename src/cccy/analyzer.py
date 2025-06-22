@@ -4,11 +4,11 @@ import ast
 from pathlib import Path
 from typing import Optional, Union
 
-from .complexity_calculators import (
+from cccy.complexity_calculators import (
     CognitiveComplexityCalculator,
     CyclomaticComplexityCalculator,
 )
-from .models import ComplexityResult, FileComplexityResult
+from cccy.models import ComplexityResult, FileComplexityResult
 
 
 class ComplexityAnalyzer:
@@ -66,7 +66,7 @@ class ComplexityAnalyzer:
             directory: 解析するディレクトリ
             recursive: サブディレクトリも解析するかどうか
             exclude_patterns: 除外するグロブパターンのリスト
-            include_patterns: 含めるグロブパターンのリスト（指定した場合、これらのみが解析される）
+            include_patterns: 含めるグロブパターンのリスト(指定した場合、これらのみが解析される)
 
         Returns:
             FileComplexityResultオブジェクトのリスト
@@ -97,7 +97,7 @@ class ComplexityAnalyzer:
             directory: 検索するディレクトリ
             recursive: 再帰的に検索するかどうか
             exclude_patterns: 除外するパターン
-            include_patterns: 含めるパターン（指定された場合、これらのみ）
+            include_patterns: 含めるパターン(指定された場合、これらのみ)
 
         Returns:
             解析するPythonファイルパスのリスト
@@ -120,7 +120,7 @@ class ComplexityAnalyzer:
         Args:
             file_path: ファイルのパス
             exclude_patterns: 除外するパターン
-            include_patterns: 含めるパターン（指定された場合、これらのみ）
+            include_patterns: 含めるパターン(指定された場合、これらのみ)
 
         Returns:
             ファイルを含める必要がある場合はTrue
@@ -178,7 +178,9 @@ class ComplexityAnalyzer:
         max_cognitive = 0
 
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):  # 関数と非同期関数
+            if isinstance(
+                node, (ast.FunctionDef, ast.AsyncFunctionDef)
+            ):  # 関数と非同期関数
                 # カルキュレーターを使用して循環的複雑度を計算
                 cyclomatic = self.cyclomatic_calculator.calculate(node)
 

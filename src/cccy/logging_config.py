@@ -1,4 +1,4 @@
-"""Logging configuration for pycomplex."""
+"""pycomplexのログ設定。"""
 
 import logging
 import sys
@@ -11,13 +11,13 @@ def setup_logging(
     enable_file_logging: bool = False,
     log_file: str = "pycomplex.log",
 ) -> None:
-    """Set up logging configuration.
+    """ログ設定をセットアップします。
 
     Args:
-        level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        format_string: Custom format string for log messages
-        enable_file_logging: Whether to enable file logging
-        log_file: Path to log file (if file logging is enabled)
+        level: ログレベル(DEBUG, INFO, WARNING, ERROR, CRITICAL)
+        format_string: ログメッセージのカスタムフォーマット文字列
+        enable_file_logging: ファイルログを有効にするかどうか
+        log_file: ログファイルのパス(ファイルログが有効な場合)
 
     """
     if format_string is None:
@@ -53,13 +53,13 @@ def setup_logging(
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Get a logger instance.
+    """ロガーインスタンスを取得します。
 
     Args:
-        name: Name for the logger (typically __name__)
+        name: ロガーの名前(通常は__name__)
 
     Returns:
-        Logger instance
+        Loggerインスタンス
 
     """
     return logging.getLogger(name)

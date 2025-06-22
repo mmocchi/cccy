@@ -6,20 +6,20 @@ from typing import Optional
 
 import click
 
-from .analyzer import ComplexityAnalyzer
-from .models import FileComplexityResult
+from cccy.analyzer import ComplexityAnalyzer
+from cccy.models import FileComplexityResult
 
 logger = logging.getLogger(__name__)
 
 
 class AnalyzerService:
-    """Service for handling complexity analysis operations."""
+    """複雑度解析操作を処理するサービス。"""
 
     def __init__(self, analyzer: ComplexityAnalyzer) -> None:
-        """Initialize the service with an analyzer instance.
+        """アナライザーインスタンスでサービスを初期化します。
 
         Args:
-            analyzer: ComplexityAnalyzer instance to use
+            analyzer: 使用するComplexityAnalyzerインスタンス
 
         """
         self.analyzer = analyzer
@@ -32,21 +32,21 @@ class AnalyzerService:
         include_patterns: Optional[list[str]] = None,
         verbose: bool = False,
     ) -> list[FileComplexityResult]:
-        """Analyze given paths and return complexity results.
+        """指定されたパスを解析し、複雑度結果を返します。
 
         Args:
-            paths: Tuple of paths to analyze
-            recursive: Whether to analyze directories recursively
-            exclude_patterns: List of glob patterns to exclude
-            include_patterns: List of glob patterns to include
-            verbose: Enable verbose output
+            paths: 解析するパスのタプル
+            recursive: ディレクトリを再帰的に解析するかどうか
+            exclude_patterns: 除外するグロブパターンのリスト
+            include_patterns: 含めるグロブパターンのリスト
+            verbose: 詳細出力を有効にする
 
         Returns:
-            List of FileComplexityResult objects
+            FileComplexityResultオブジェクトのリスト
 
         Raises:
-            FileNotFoundError: If a specified path doesn't exist
-            PermissionError: If unable to read files
+            FileNotFoundError: 指定されたパスが存在しない場合
+            PermissionError: ファイルを読み込めない場合
 
         """
         exclude_patterns = exclude_patterns or []
@@ -70,17 +70,17 @@ class AnalyzerService:
         include_patterns: list[str],
         verbose: bool,
     ) -> list[FileComplexityResult]:
-        """Analyze a single path (file or directory).
+        """単一のパス(ファイルまたはディレクトリ)を解析します。
 
         Args:
-            path: Path to analyze
-            recursive: Whether to analyze directories recursively
-            exclude_patterns: List of glob patterns to exclude
-            include_patterns: List of glob patterns to include
-            verbose: Enable verbose output
+            path: 解析するパス
+            recursive: ディレクトリを再帰的に解析するかどうか
+            exclude_patterns: 除外するグロブパターンのリスト
+            include_patterns: 含めるグロブパターンのリスト
+            verbose: 詳細出力を有効にする
 
         Returns:
-            List of FileComplexityResult objects
+            FileComplexityResultオブジェクトのリスト
 
         """
         if verbose:
@@ -105,20 +105,20 @@ class AnalyzerService:
         include_patterns: list[str],
         verbose: bool,
     ) -> list[FileComplexityResult]:
-        """Process a path based on its type.
+        """パスのタイプに基づいてパスを処理します。
 
         Args:
-            path: Path to process
-            recursive: Whether to analyze directories recursively
-            exclude_patterns: List of glob patterns to exclude
-            include_patterns: List of glob patterns to include
-            verbose: Enable verbose output
+            path: 処理するパス
+            recursive: ディレクトリを再帰的に解析するかどうか
+            exclude_patterns: 除外するグロブパターンのリスト
+            include_patterns: 含めるグロブパターンのリスト
+            verbose: 詳細出力を有効にする
 
         Returns:
-            List of FileComplexityResult objects
+            FileComplexityResultオブジェクトのリスト
 
         Raises:
-            FileNotFoundError: If path is neither file nor directory
+            FileNotFoundError: パスがファイルでもディレクトリでもない場合
 
         """
         if path.is_file():
@@ -135,12 +135,12 @@ class AnalyzerService:
     def _handle_permission_error(
         self, path: Path, error: PermissionError, verbose: bool
     ) -> None:
-        """Handle permission denied errors.
+        """アクセス拒否エラーを処理します。
 
         Args:
-            path: Path that caused the error
-            error: The permission error
-            verbose: Whether to show verbose output
+            path: エラーの原因となったパス
+            error: アクセス拒否エラー
+            verbose: 詳細出力を表示するかどうか
 
         """
         logger.error(f"Permission denied accessing {path}: {error}")
@@ -150,12 +150,12 @@ class AnalyzerService:
     def _handle_general_error(
         self, path: Path, error: Exception, verbose: bool
     ) -> None:
-        """Handle general analysis errors.
+        """一般的な解析エラーを処理します。
 
         Args:
-            path: Path that caused the error
-            error: The general error
-            verbose: Whether to show verbose output
+            path: エラーの原因となったパス
+            error: 一般的なエラー
+            verbose: 詳細出力を表示するかどうか
 
         """
         logger.error(f"Error analyzing {path}: {error}")
@@ -165,14 +165,14 @@ class AnalyzerService:
     def _analyze_single_file(
         self, file_path: Path, verbose: bool = False
     ) -> Optional[FileComplexityResult]:
-        """Analyze a single file.
+        """単一ファイルを解析します。
 
         Args:
-            file_path: Path to the file to analyze
-            verbose: Enable verbose output
+            file_path: 解析するファイルのパス
+            verbose: 詳細出力を有効にする
 
         Returns:
-            FileComplexityResult or None if analysis failed
+            FileComplexityResultまたは解析が失敗した場合はNone
 
         """
         try:
@@ -198,17 +198,17 @@ class AnalyzerService:
         include_patterns: list[str],
         verbose: bool = False,
     ) -> list[FileComplexityResult]:
-        """Analyze a directory.
+        """ディレクトリを解析します。
 
         Args:
-            directory: Directory to analyze
-            recursive: Whether to analyze recursively
-            exclude_patterns: List of glob patterns to exclude
-            include_patterns: List of glob patterns to include
-            verbose: Enable verbose output
+            directory: 解析するディレクトリ
+            recursive: 再帰的に解析するかどうか
+            exclude_patterns: 除外するグロブパターンのリスト
+            include_patterns: 含めるグロブパターンのリスト
+            verbose: 詳細出力を有効にする
 
         Returns:
-            List of FileComplexityResult objects
+            FileComplexityResultオブジェクトのリスト
 
         """
         try:
@@ -237,15 +237,15 @@ class AnalyzerService:
         max_complexity: int,
         max_cognitive: Optional[int] = None,
     ) -> list[FileComplexityResult]:
-        """Filter results that exceed complexity thresholds.
+        """複雑度闾値を超える結果をフィルタリングします。
 
         Args:
-            results: List of analysis results
-            max_complexity: Maximum allowed cyclomatic complexity
-            max_cognitive: Maximum allowed cognitive complexity (optional)
+            results: 解析結果のリスト
+            max_complexity: 許可される最大循環的複雑度
+            max_cognitive: 許可される最大認知的複雑度(オプション)
 
         Returns:
-            List of results that exceed thresholds
+            闾値を超える結果のリスト
 
         """
         failed_results = []

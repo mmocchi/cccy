@@ -1,14 +1,14 @@
 """Python complexity measurement tool."""
 
-from .analyzer import ComplexityAnalyzer
-from .complexity_calculators import (
+from cccy.analyzer import ComplexityAnalyzer
+from cccy.complexity_calculators import (
     CognitiveComplexityCalculator,
     ComplexityCalculator,
     ComplexityCalculatorFactory,
     CyclomaticComplexityCalculator,
 )
-from .config import CccyConfig
-from .exceptions import (
+from cccy.config import CccyConfig
+from cccy.exceptions import (
     AnalysisError,
     CccyError,
     ComplexityCalculationError,
@@ -16,9 +16,9 @@ from .exceptions import (
     DirectoryAnalysisError,
     FileAnalysisError,
 )
-from .formatters import OutputFormatter
-from .models import ComplexityResult, FileComplexityResult
-from .services import AnalyzerService
+from cccy.formatters import OutputFormatter
+from cccy.models import ComplexityResult, FileComplexityResult
+from cccy.services import AnalyzerService
 
 __all__ = [
     "AnalysisError",

@@ -25,8 +25,7 @@ class TestCLI:
             f"CLI help command failed with exit code {result.exit_code}"
         )
         assert (
-            "Analyze Python code for Cyclomatic and Cognitive complexity"
-            in result.output
+            "Pythonコードの循環的複雑度と認知的複雑度を解析します" in result.output
         ), "Main description not found in help output"
         assert "check" in result.output, "'check' command not found in help output"
         assert "show-list" in result.output, (

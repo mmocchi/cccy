@@ -5,7 +5,7 @@ from typing import Optional
 
 import click
 
-from .cli_helpers import (
+from cccy.cli_helpers import (
     create_analyzer_service,
     display_failed_results,
     display_success_results,
@@ -14,9 +14,9 @@ from .cli_helpers import (
     load_and_merge_config,
     validate_required_config,
 )
-from .formatters import OutputFormatter
-from .logging_config import setup_logging
-from .type_helpers import get_list_value, get_optional_int_value
+from cccy.formatters import OutputFormatter
+from cccy.logging_config import setup_logging
+from cccy.type_helpers import get_list_value, get_optional_int_value
 
 
 @click.group(invoke_without_command=True)
@@ -48,7 +48,7 @@ def main(ctx: click.Context) -> None:
 
     \b
     COMMANDS:
-      check          複雑度の閾値を検証（CI対応）
+      check          複雑度の閾値を検証(CI対応)
       show-list      詳細な複雑度メトリクスを表示
       show-functions 関数レベルの複雑度メトリクスを表示
       show-summary   集約統計を表示

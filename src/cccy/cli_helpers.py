@@ -5,11 +5,11 @@ from typing import Optional, Union
 
 import click
 
-from .analyzer import ComplexityAnalyzer
-from .config import CccyConfig
-from .formatters import OutputFormatter
-from .models import ComplexityResult, FileComplexityResult
-from .services import AnalyzerService
+from cccy.analyzer import ComplexityAnalyzer
+from cccy.config import CccyConfig
+from cccy.formatters import OutputFormatter
+from cccy.models import ComplexityResult, FileComplexityResult
+from cccy.services import AnalyzerService
 
 
 def load_and_merge_config(
@@ -19,17 +19,17 @@ def load_and_merge_config(
     include: Optional[tuple[str, ...]] = None,
     paths: Optional[tuple[str, ...]] = None,
 ) -> dict[str, Union[str, int, list[str], None]]:
-    """Load configuration and merge with CLI options.
+    """設定を読み込み、CLIオプションとマージします。
 
     Args:
-        max_complexity: CLI max complexity option
-        max_cognitive: CLI max cognitive option
-        exclude: CLI exclude patterns
-        include: CLI include patterns
-        paths: CLI paths
+        max_complexity: CLI最大複雑度オプション
+        max_cognitive: CLI最大認知的オプション
+        exclude: CLI除外パターン
+        include: CLI含めるパターン
+        paths: CLIパス
 
     Returns:
-        Merged configuration dictionary
+        マージされた設定辞書
 
     """
     config = CccyConfig()
@@ -45,13 +45,13 @@ def load_and_merge_config(
 def create_analyzer_service(
     max_complexity: Optional[int] = None,
 ) -> tuple[ComplexityAnalyzer, AnalyzerService]:
-    """Create analyzer and service instances.
+    """アナライザーとサービスインスタンスを作成します。
 
     Args:
-        max_complexity: Maximum complexity threshold for analyzer
+        max_complexity: アナライザーの最大複雑度闾値
 
     Returns:
-        Tuple of (ComplexityAnalyzer, AnalyzerService)
+        (ComplexityAnalyzer, AnalyzerService)のタプル
 
     """
     analyzer = ComplexityAnalyzer(max_complexity=max_complexity)
@@ -60,7 +60,7 @@ def create_analyzer_service(
 
 
 def handle_no_results() -> None:
-    """Handle case when no Python files are found."""
+    """Pythonファイルが見つからない場合を処理します。"""
     click.echo("No Python files found to analyze.")
     sys.exit(1)
 
@@ -71,13 +71,13 @@ def display_failed_results(
     max_complexity: int,
     max_cognitive: Optional[int] = None,
 ) -> None:
-    """Display results that failed complexity checks.
+    """複雑度チェックに失敗した結果を表示します。
 
     Args:
-        failed_results: List of results that failed checks
-        total_results_count: Total number of files analyzed
-        max_complexity: Maximum cyclomatic complexity threshold
-        max_cognitive: Maximum cognitive complexity threshold (optional)
+        failed_results: チェックに失敗した結果のリスト
+        total_results_count: 解析されたファイルの総数
+        max_complexity: 最大循環的複雑度闾値
+        max_cognitive: 最大認知的複雑度闾値(オプション)
 
     """
     _display_failure_header()
@@ -89,7 +89,7 @@ def display_failed_results(
 
 
 def _display_failure_header() -> None:
-    """Display the header for failed complexity checks."""
+    """失敗した複雑度チェックのヘッダーを表示します。"""
     click.echo("❌ Complexity check failed!")
     click.echo("\nFiles exceeding complexity thresholds:")
 
@@ -97,12 +97,12 @@ def _display_failure_header() -> None:
 def _display_single_failed_result(
     result: FileComplexityResult, max_complexity: int, max_cognitive: Optional[int]
 ) -> None:
-    """Display details for a single failed result.
+    """単一の失敗結果の詳細を表示します。
 
     Args:
-        result: File complexity result that failed
-        max_complexity: Maximum cyclomatic complexity threshold
-        max_cognitive: Maximum cognitive complexity threshold (optional)
+        result: 失敗したファイル複雑度結果
+        max_complexity: 最大循環的複雑度闾値
+        max_cognitive: 最大認知的複雑度闾値(オプション)
 
     """
     click.echo(f"\n📁 {result.file_path}")
@@ -123,15 +123,15 @@ def _display_single_failed_result(
 def _get_problem_functions(
     functions: list[ComplexityResult], max_complexity: int, max_cognitive: Optional[int]
 ) -> list[str]:
-    """Get list of functions that exceed complexity thresholds.
+    """複雑度闾値を超える関数のリストを取得します。
 
     Args:
-        functions: List of function complexity results
-        max_complexity: Maximum cyclomatic complexity threshold
-        max_cognitive: Maximum cognitive complexity threshold (optional)
+        functions: 関数複雑度結果のリスト
+        max_complexity: 最大循環的複雑度闾値
+        max_cognitive: 最大認知的複雑度闾値(オプション)
 
     Returns:
-        List of formatted problem function descriptions
+        フォーマットされた問題のある関数の説明リスト
 
     """
     problem_functions = []
@@ -150,11 +150,11 @@ def _get_problem_functions(
 
 
 def _display_failure_summary(failed_count: int, total_count: int) -> None:
-    """Display summary of failed complexity checks.
+    """失敗した複雑度チェックの要約を表示します。
 
     Args:
-        failed_count: Number of files that failed
-        total_count: Total number of files analyzed
+        failed_count: 失敗したファイルの数
+        total_count: 解析されたファイルの総数
 
     """
     click.echo(
@@ -163,10 +163,10 @@ def _display_failure_summary(failed_count: int, total_count: int) -> None:
 
 
 def display_success_results(total_results_count: int) -> None:
-    """Display success message for complexity checks.
+    """複雑度チェックの成功メッセージを表示します。
 
     Args:
-        total_results_count: Total number of files that passed
+        total_results_count: パスしたファイルの総数
 
     """
     click.echo(f"✅ All {total_results_count} files passed complexity check!")
@@ -175,13 +175,13 @@ def display_success_results(total_results_count: int) -> None:
 def validate_required_config(
     merged_config: dict[str, Union[str, int, list[str], None]],
 ) -> None:
-    """Validate that required configuration is present.
+    """必要な設定が存在することを検証します。
 
     Args:
-        merged_config: Merged configuration dictionary
+        merged_config: マージされた設定辞書
 
     Raises:
-        SystemExit: If required configuration is missing
+        SystemExit: 必要な設定が缠っている場合
 
     """
     if merged_config["max_complexity"] is None:
@@ -197,15 +197,15 @@ def format_and_display_output(
     output_format: str,
     formatter: OutputFormatter,
 ) -> None:
-    """Format and display output based on specified format.
+    """指定されたフォーマットに基づいて出力をフォーマットし、表示します。
 
     Args:
-        results: List of analysis results
-        output_format: Desired output format
-        formatter: OutputFormatter instance
+        results: 解析結果のリスト
+        output_format: 希望する出力フォーマット
+        formatter: OutputFormatterインスタンス
 
     Raises:
-        SystemExit: If unknown format is specified
+        SystemExit: 不明なフォーマットが指定された場合
 
     """
     # Sort results by file path for consistent output

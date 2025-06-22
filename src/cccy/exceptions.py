@@ -1,33 +1,33 @@
-"""Custom exceptions for cccy."""
+"""cccyのカスタム例外。"""
 
 
 class CccyError(Exception):
-    """Base exception for cccy errors."""
+    """cccyエラーのベース例外。"""
 
     pass
 
 
 class ConfigurationError(CccyError):
-    """Raised when there's an issue with configuration."""
+    """設定に問題がある場合に発生します。"""
 
     pass
 
 
 class AnalysisError(CccyError):
-    """Raised when analysis fails."""
+    """解析が失敗した場合に発生します。"""
 
     pass
 
 
 class FileAnalysisError(AnalysisError):
-    """Raised when analyzing a specific file fails."""
+    """特定のファイルの解析が失敗した場合に発生します。"""
 
     def __init__(self, file_path: str, message: str) -> None:
-        """Initialize with file path and error message.
+        """ファイルパスとエラーメッセージで初期化します。
 
         Args:
-            file_path: Path to the file that failed analysis
-            message: Error message
+            file_path: 解析に失敗したファイルのパス
+            message: エラーメッセージ
 
         """
         self.file_path = file_path
@@ -35,14 +35,14 @@ class FileAnalysisError(AnalysisError):
 
 
 class DirectoryAnalysisError(AnalysisError):
-    """Raised when analyzing a directory fails."""
+    """ディレクトリの解析が失敗した場合に発生します。"""
 
     def __init__(self, directory_path: str, message: str) -> None:
-        """Initialize with directory path and error message.
+        """ディレクトリパスとエラーメッセージで初期化します。
 
         Args:
-            directory_path: Path to the directory that failed analysis
-            message: Error message
+            directory_path: 解析に失敗したディレクトリのパス
+            message: エラーメッセージ
 
         """
         self.directory_path = directory_path
@@ -50,15 +50,15 @@ class DirectoryAnalysisError(AnalysisError):
 
 
 class ComplexityCalculationError(CccyError):
-    """Raised when complexity calculation fails."""
+    """複雑度計算が失敗した場合に発生します。"""
 
     def __init__(self, function_name: str, calculator_type: str, message: str) -> None:
-        """Initialize with function details and error message.
+        """関数の詳細とエラーメッセージで初期化します。
 
         Args:
-            function_name: Name of the function that failed
-            calculator_type: Type of complexity calculator that failed
-            message: Error message
+            function_name: 失敗した関数の名前
+            calculator_type: 失敗した複雑度カルキュレーターのタイプ
+            message: エラーメッセージ
 
         """
         self.function_name = function_name

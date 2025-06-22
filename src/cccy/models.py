@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class ComplexityResult(BaseModel):
-    """Result of complexity analysis for a single function or method."""
+    """単一の関数またはメソッドの複雑度解析結果。"""
 
     name: str
     cyclomatic_complexity: int = Field(ge=0, description="Cyclomatic complexity score")
@@ -25,7 +25,7 @@ class ComplexityResult(BaseModel):
 
 
 class FileComplexityResult(BaseModel):
-    """Result of complexity analysis for a single file."""
+    """単一ファイルの複雑度解析結果。"""
 
     file_path: str
     functions: list[ComplexityResult] = Field(default_factory=list)
@@ -43,17 +43,17 @@ class FileComplexityResult(BaseModel):
     model_config = ConfigDict(validate_assignment=True)
 
     def get_status(self, thresholds: Optional[dict] = None) -> str:
-        """Return status based on complexity thresholds.
+        """複雑度闾値に基づいてステータスを返します。
 
         Args:
-            thresholds: Optional custom thresholds dict with structure:
+            thresholds: オプションのカスタム闾値辞書。構造:
                        {
                            "medium": {"cyclomatic": 5, "cognitive": 4},
                            "high": {"cyclomatic": 10, "cognitive": 7}
                        }
 
         Returns:
-            Status string: "OK", "MEDIUM", or "HIGH"
+            ステータス文字列: "OK"、"MEDIUM"、または"HIGH"
 
         """
         # Use default thresholds if none provided
@@ -79,16 +79,16 @@ class FileComplexityResult(BaseModel):
 
     @property
     def status(self) -> str:
-        """Return status based on default complexity thresholds.
+        """デフォルトの複雑度闾値に基づいてステータスを返します。
 
-        This property is kept for backward compatibility.
-        For configurable thresholds, use get_status() method.
+        このプロパティは下位互換性のために保持されています。
+        設定可能な闾値には、get_status()メソッドを使用してください。
         """
         return self.get_status()
 
 
 class CccySettings(BaseSettings):
-    """Configuration settings for cccy."""
+    """cccyの設定。"""
 
     max_complexity: Optional[int] = Field(
         None, ge=1, description="Maximum allowed cyclomatic complexity"
@@ -120,7 +120,7 @@ class CccySettings(BaseSettings):
     @field_validator("status_thresholds")
     @classmethod
     def validate_status_thresholds(cls, v: dict) -> dict[str, dict[str, int]]:
-        """Validate and merge status thresholds with defaults."""
+        """ステータス闾値を検証し、デフォルトとマージします。"""
         defaults = cls._get_default_thresholds()
         result = cls._merge_thresholds_with_defaults(defaults, v)
         cls._validate_threshold_ordering(result)
@@ -128,7 +128,7 @@ class CccySettings(BaseSettings):
 
     @classmethod
     def _get_default_thresholds(cls) -> dict[str, dict[str, int]]:
-        """Get default threshold values."""
+        """デフォルト闾値値を取得します。"""
         return {
             "medium": {"cyclomatic": 5, "cognitive": 4},
             "high": {"cyclomatic": 10, "cognitive": 7},
@@ -138,7 +138,7 @@ class CccySettings(BaseSettings):
     def _merge_thresholds_with_defaults(
         cls, defaults: dict[str, dict[str, int]], user_input: dict
     ) -> dict[str, dict[str, int]]:
-        """Merge user input with default thresholds."""
+        """ユーザー入力をデフォルト闾値とマージします。"""
         result = defaults.copy()
         for level in ["medium", "high"]:
             if level in user_input:
@@ -149,7 +149,7 @@ class CccySettings(BaseSettings):
     def _update_level_thresholds(
         cls, result: dict[str, dict[str, int]], user_input: dict, level: str
     ) -> None:
-        """Update thresholds for a specific level."""
+        """特定のレベルの闾値を更新します。"""
         for metric in ["cyclomatic", "cognitive"]:
             if metric in user_input[level]:
                 cls._validate_threshold_value(user_input[level][metric], metric, level)
@@ -157,7 +157,7 @@ class CccySettings(BaseSettings):
 
     @classmethod
     def _validate_threshold_value(cls, value: int, metric: str, level: str) -> None:
-        """Validate a single threshold value."""
+        """単一の闾値値を検証します。"""
         if not isinstance(value, int) or value < 0:
             raise ValueError(
                 f"{metric} threshold for {level} must be a non-negative integer"
@@ -165,20 +165,20 @@ class CccySettings(BaseSettings):
 
     @classmethod
     def _validate_threshold_ordering(cls, result: dict[str, dict[str, int]]) -> None:
-        """Validate that high thresholds are >= medium thresholds."""
+        """high闾値がmedium闾値以上であることを検証します。"""
         for metric in ["cyclomatic", "cognitive"]:
             if result["high"][metric] < result["medium"][metric]:
                 raise ValueError(f"High {metric} threshold must be >= medium threshold")
 
     @classmethod
     def from_toml_config(cls, config_data: dict) -> "CccySettings":
-        """Create settings from TOML configuration data.
+        """TOML設定データから設定を作成します。
 
         Args:
-            config_data: Configuration data from pyproject.toml [tool.cccy] section
+            config_data: pyproject.toml [tool.cccy]セクションからの設定データ
 
         Returns:
-            CccySettings instance
+            CccySettingsインスタンス
 
         """
         # Convert kebab-case keys to snake_case for Pydantic

@@ -35,12 +35,15 @@ def create_banner() -> str:
 │  ██▀ ██▀ ██▀ █▄█                                        │
 │  ██▄ ██▄ ██▄  █     {version_text}{" " * padding}    │
 │                                                         │
-│  Python Cycromatic and Cognitive Complexity Analyzer    │
+│  Python Code Complexity Analyzer                        │
 │                                                         │
 └─────────────────────────────────────────────────────────┘"""
 
 
-@click.group(invoke_without_command=True)
+@click.group(
+    invoke_without_command=True,
+    help="Pythonコードの循環的複雑度と認知的複雑度を解析します",
+)
 @click.pass_context
 @click.version_option()
 def main(ctx: click.Context) -> None:  # noqa: D103

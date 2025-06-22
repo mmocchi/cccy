@@ -418,4 +418,4 @@ class TestCLI:
 
         assert result.exit_code == 0
         assert "Python Code Complexity Analyzer" in result.output
-        assert "COMMANDS:" in result.output
+        assert "Commands:" in result.output

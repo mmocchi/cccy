@@ -24,13 +24,8 @@ jobs:
           workflow_config: |
             {
               "Test": {
-                "branches": ["main", "develop"],
-                "jobs": ["test"],
-                "max_retries": 3
-              },
-              "Publish Python Package": {
                 "branches": ["main"],
-                "jobs": [],
+                "jobs": ["test"],
                 "max_retries": 2
               }
             }

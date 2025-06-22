@@ -5,6 +5,7 @@ from typing import Optional
 
 import click
 
+from cccy import get_version
 from cccy.cli_helpers import (
     create_analyzer_service,
     display_failed_results,
@@ -19,46 +20,38 @@ from cccy.logging_config import setup_logging
 from cccy.type_helpers import get_list_value, get_optional_int_value
 
 
+def create_banner() -> str:
+    """Create the CLI banner with dynamic version."""
+    version = get_version()
+    # Calculate padding to keep version aligned properly
+    max_width = 57  # Available width inside the box
+    version_text = f"v{version}"
+    # Position version on the right side of the ascii art line
+    padding = max_width - 25 - len(version_text) # 25 is width of ascii art
+    padding = max(padding, 1)
+
+    return f"""┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  ██▀ ██▀ ██▀ █▄█                                        │
+│  ██▄ ██▄ ██▄  █     {version_text}{' ' * padding}    │
+│                                                         │
+│  Python Cycromatic and Cognitive Complexity Analyzer    │
+│                                                         │
+└─────────────────────────────────────────────────────────┘"""
+
+
 @click.group(invoke_without_command=True)
 @click.pass_context
 @click.version_option()
 def main(ctx: click.Context) -> None:
-    """\b
-    ┌─────────────────────────────────────────────────────────┐
-    │  ___        ___                 _                       │
-    │ | _ \\_  _  / __|___ _ __  _ __ | |_____ __              │
-    │ |  _/ || || (__/ _ \\ '  \\| '_ \\| / -_) \\ /              │
-    │ |_|  \\_, | \\___\\___/_|_|_| .__/|_\\___/_\\_\\              │
-    │      |__/                |_|                            │
-    │                                                         │
-    │ Python Code Complexity Analyzer - v0.1.0                │
-    │                                                         │
-    └─────────────────────────────────────────────────────────┘
-
-    \b
-    Pythonコードの循環的複雑度と認知的複雑度を解析します。
-    CI/CDパイプラインで複雑度の閾値を強制できます。
-    プロジェクト全体の設定にはpyproject.tomlを使用します。
-
-    \b
-    QUICK START:
-      pycomplex check                    # pyproject.toml設定を使用
-      pycomplex show-list src/           # src/ディレクトリを解析
-      pycomplex check --max-complexity 10 src/
-
-    \b
-    COMMANDS:
-      check          複雑度の閾値を検証(CI対応)
-      show-list      詳細な複雑度メトリクスを表示
-      show-functions 関数レベルの複雑度メトリクスを表示
-      show-summary   集約統計を表示
-
-    \b
-    CONFIGURATION:
-      pyproject.tomlに[tool.pycomplex]セクションを追加
-      max-complexity、除外パターン、デフォルトパスなどを設定
-    """
     if ctx.invoked_subcommand is None:
+        # Display custom banner and help
+        banner = create_banner()
+        click.echo(click.style(banner, fg='cyan', bold=True))
+        click.echo()
+        click.echo()
+        click.echo("Pythonコードの循環的複雑度と認知的複雑度を解析します。")
+        click.echo()
         click.echo(ctx.get_help())
 
 
@@ -107,10 +100,10 @@ def check(
 
     \b
     EXAMPLES:
-      pycomplex check                           # Use pyproject.toml config
-      pycomplex check --max-complexity 10 src/ # Set threshold explicitly
-      pycomplex check --max-cognitive 7 src/   # Add cognitive limit
-      pycomplex check --exclude "*/tests/*"    # Exclude test files
+      cccy check                           # Use pyproject.toml config
+      cccy check --max-complexity 10 src/ # Set threshold explicitly
+      cccy check --max-cognitive 7 src/   # Add cognitive limit
+      cccy check --exclude "*/tests/*"    # Exclude test files
 
     \b
     CONFIGURATION:
@@ -210,11 +203,11 @@ def show_list(
 
     \b
     EXAMPLES:
-      pycomplex show-list                    # Use pyproject.toml config
-      pycomplex show-list src/              # Analyze specific directory
-      pycomplex show-list --format json     # JSON output for tools
-      pycomplex show-list --format csv      # Spreadsheet-friendly
-      pycomplex show-list --format detailed # Function-level details
+      cccy show-list                    # Use pyproject.toml config
+      cccy show-list src/              # Analyze specific directory
+      cccy show-list --format json     # JSON output for tools
+      cccy show-list --format csv      # Spreadsheet-friendly
+      cccy show-list --format detailed # Function-level details
 
     \b
     OUTPUT FORMATS:
@@ -294,10 +287,10 @@ def show_functions(
 
     \b
     EXAMPLES:
-      pycomplex show-functions                 # Use pyproject.toml config
-      pycomplex show-functions src/           # Analyze specific directory
-      pycomplex show-functions --format json  # JSON output for tools
-      pycomplex show-functions --format csv   # Spreadsheet-friendly
+      cccy show-functions                 # Use pyproject.toml config
+      cccy show-functions src/           # Analyze specific directory
+      cccy show-functions --format json  # JSON output for tools
+      cccy show-functions --format csv   # Spreadsheet-friendly
 
     \b
     OUTPUT FORMATS:
@@ -375,9 +368,9 @@ def show_summary(
 
     \b
     EXAMPLES:
-      pycomplex show-summary              # Use pyproject.toml config
-      pycomplex show-summary src/         # Analyze specific directory
-      pycomplex show-summary src/ tests/  # Multiple directories
+      cccy show-summary              # Use pyproject.toml config
+      cccy show-summary src/         # Analyze specific directory
+      cccy show-summary src/ tests/  # Multiple directories
 
     \b
     OUTPUT INCLUDES:

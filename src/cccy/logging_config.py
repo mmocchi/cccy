@@ -1,4 +1,4 @@
-"""pycomplexのログ設定。"""
+"""cccyのログ設定。"""
 
 import logging
 import sys
@@ -9,7 +9,7 @@ def setup_logging(
     level: str = "WARNING",
     format_string: Optional[str] = None,
     enable_file_logging: bool = False,
-    log_file: str = "pycomplex.log",
+    log_file: str = "cccy.log",
 ) -> None:
     """ログ設定をセットアップします。
 

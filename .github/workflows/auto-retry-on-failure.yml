@@ -1,0 +1,37 @@
+name: Auto Retry on Failure
+
+on:
+  workflow_run:
+    workflows: ["Test"]
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  auto-retry:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Auto retry failed jobs
+        uses: ./.github/actions/auto-retry-failed-jobs
+        with:
+          workflow_config: |
+            {
+              "Test": {
+                "branches": ["main", "develop"],
+                "jobs": ["test"],
+                "max_retries": 3
+              },
+              "Publish Python Package": {
+                "branches": ["main"],
+                "jobs": [],
+                "max_retries": 2
+              }
+            }
+          github_token: ${{ secrets.GITHUB_TOKEN }}

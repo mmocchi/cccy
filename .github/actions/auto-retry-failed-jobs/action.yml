@@ -1,0 +1,221 @@
+name: 'Auto Retry Failed Jobs'
+description: 'Automatically retry failed workflow jobs with configurable filters'
+
+inputs:
+  workflow_config:
+    description: 'ワークフロー別設定 (JSON形式: {"workflow_name": {"branches": ["main"], "jobs": ["test"], "max_retries": 3}})'
+    required: true
+  github_token:
+    description: 'GitHub token for API access'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  retry_executed:
+    description: 'Whether retry was executed'
+    value: ${{ steps.retry-status.outputs.retry_executed }}
+  failed_jobs:
+    description: 'List of failed jobs'
+    value: ${{ steps.failed-jobs.outputs.failed_jobs }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Get workflow run details
+      id: workflow-info
+      shell: bash
+      run: |
+        # workflow_runイベントから自動的に取得
+        echo "workflow_id=${{ github.event.workflow_run.id }}" >> $GITHUB_OUTPUT
+        echo "workflow_name=${{ github.event.workflow_run.name }}" >> $GITHUB_OUTPUT
+        echo "attempt_number=${{ github.event.workflow_run.run_attempt }}" >> $GITHUB_OUTPUT
+        echo "head_branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+        echo "repository=${{ github.repository }}" >> $GITHUB_OUTPUT
+
+    - name: Parse workflow configuration
+      id: parse-config
+      shell: bash
+      run: |
+        WORKFLOW_CONFIG="${{ inputs.workflow_config }}"
+        CURRENT_WORKFLOW="${{ steps.workflow-info.outputs.workflow_name }}"
+        
+        echo "Parsing workflow configuration for: $CURRENT_WORKFLOW"
+        echo "Workflow config: $WORKFLOW_CONFIG"
+        
+        # 現在のワークフローに対する設定を取得
+        CONFIG_BRANCHES=$(echo "$WORKFLOW_CONFIG" | jq -r --arg workflow "$CURRENT_WORKFLOW" '.[$workflow].branches // empty | join(",")')
+        CONFIG_JOBS=$(echo "$WORKFLOW_CONFIG" | jq -r --arg workflow "$CURRENT_WORKFLOW" '.[$workflow].jobs // empty | join(",")')
+        CONFIG_MAX_RETRIES=$(echo "$WORKFLOW_CONFIG" | jq -r --arg workflow "$CURRENT_WORKFLOW" '.[$workflow].max_retries // 3')
+        
+        echo "Config branches for $CURRENT_WORKFLOW: $CONFIG_BRANCHES"
+        echo "Config jobs for $CURRENT_WORKFLOW: $CONFIG_JOBS"
+        echo "Config max_retries for $CURRENT_WORKFLOW: $CONFIG_MAX_RETRIES"
+        
+        # 設定が見つからない場合はスキップ
+        if [ "$CONFIG_BRANCHES" == "null" ] && [ "$CONFIG_JOBS" == "null" ]; then
+          echo "No configuration found for workflow: $CURRENT_WORKFLOW"
+          echo "config_found=false" >> $GITHUB_OUTPUT
+        else
+          # デフォルト値の設定
+          if [ "$CONFIG_BRANCHES" == "null" ] || [ "$CONFIG_BRANCHES" == "" ]; then
+            CONFIG_BRANCHES="main,develop"
+          fi
+          if [ "$CONFIG_JOBS" == "null" ]; then
+            CONFIG_JOBS=""
+          fi
+          if [ "$CONFIG_MAX_RETRIES" == "null" ] || [ "$CONFIG_MAX_RETRIES" == "" ]; then
+            CONFIG_MAX_RETRIES="3"
+          fi
+          
+          echo "effective_branches=$CONFIG_BRANCHES" >> $GITHUB_OUTPUT
+          echo "effective_jobs=$CONFIG_JOBS" >> $GITHUB_OUTPUT
+          echo "effective_max_retries=$CONFIG_MAX_RETRIES" >> $GITHUB_OUTPUT
+          echo "config_found=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Check filters and retry limit
+      id: retry-check
+      shell: bash
+      run: |
+        # 設定が見つからない場合はスキップ
+        if [ "${{ steps.parse-config.outputs.config_found }}" == "false" ]; then
+          echo "should_retry=false" >> $GITHUB_OUTPUT
+          echo "No configuration found for workflow: ${{ steps.workflow-info.outputs.workflow_name }}. Skipping."
+          exit 0
+        fi
+        
+        # 設定値の取得
+        MAX_RETRIES="${{ steps.parse-config.outputs.effective_max_retries }}"
+        CURRENT_ATTEMPT=${{ steps.workflow-info.outputs.attempt_number }}
+        TARGET_BRANCHES="${{ steps.parse-config.outputs.effective_branches }}"
+        CURRENT_WORKFLOW="${{ steps.workflow-info.outputs.workflow_name }}"
+        CURRENT_BRANCH="${{ steps.workflow-info.outputs.head_branch }}"
+        
+        echo "Current attempt: $CURRENT_ATTEMPT"
+        echo "Max retries: $MAX_RETRIES"
+        echo "Current workflow: $CURRENT_WORKFLOW"
+        echo "Target branches: $TARGET_BRANCHES"
+        echo "Current branch: $CURRENT_BRANCH"
+        
+        # ブランチフィルターチェック
+        should_process=false
+        if [ -z "$TARGET_BRANCHES" ] || [ "$TARGET_BRANCHES" == "" ]; then
+          echo "No branch filter specified, processing all branches"
+          should_process=true
+        else
+          IFS=',' read -ra BRANCH_ARRAY <<< "$TARGET_BRANCHES"
+          for branch in "${BRANCH_ARRAY[@]}"; do
+            branch=$(echo "$branch" | xargs)  # trim whitespace
+            if [ "$branch" == "$CURRENT_BRANCH" ]; then
+              echo "Branch $CURRENT_BRANCH matches filter"
+              should_process=true
+              break
+            fi
+          done
+        fi
+        
+        if [ "$should_process" == "false" ]; then
+          echo "should_retry=false" >> $GITHUB_OUTPUT
+          echo "Branch $CURRENT_BRANCH does not match target branches ($TARGET_BRANCHES). Skipping."
+          exit 0
+        fi
+        
+        # 再試行回数チェック
+        if [ $CURRENT_ATTEMPT -lt $MAX_RETRIES ]; then
+          echo "should_retry=true" >> $GITHUB_OUTPUT
+          echo "Will retry the failed workflow (attempt $CURRENT_ATTEMPT of $MAX_RETRIES)"
+        else
+          echo "should_retry=false" >> $GITHUB_OUTPUT
+          echo "Maximum retry attempts ($MAX_RETRIES) reached. Will not retry."
+        fi
+
+    - name: Check failed jobs condition
+      if: steps.retry-check.outputs.should_retry == 'true'
+      id: failed-jobs
+      shell: bash
+      run: |
+        TARGET_JOBS="${{ steps.parse-config.outputs.effective_jobs }}"
+        WORKFLOW_ID="${{ steps.workflow-info.outputs.workflow_id }}"
+        
+        # GitHub CLIを使用して失敗したジョブの詳細を取得
+        ALL_FAILED_JOBS=$(gh run view $WORKFLOW_ID --json jobs \
+          --jq '.jobs[] | select(.conclusion == "failure") | .name')
+        
+        echo "All failed jobs:"
+        echo "$ALL_FAILED_JOBS"
+        
+        FAILED_JOBS_CSV=$(echo "$ALL_FAILED_JOBS" | tr '\n' ',' | sed 's/,$//')
+        echo "failed_jobs=$FAILED_JOBS_CSV" >> $GITHUB_OUTPUT
+        
+        # 条件ジョブが指定されている場合、そのジョブが失敗しているかチェック
+        if [ -z "$TARGET_JOBS" ] || [ "$TARGET_JOBS" == "" ]; then
+          echo "No target jobs specified, will retry for any failed jobs"
+          echo "should_retry_filtered=true" >> $GITHUB_OUTPUT
+        else
+          echo "Target condition jobs: $TARGET_JOBS"
+          should_retry=false
+          IFS=',' read -ra JOB_ARRAY <<< "$TARGET_JOBS"
+          
+          # 指定されたジョブのいずれかが失敗している場合のみ再実行
+          while IFS= read -r failed_job; do
+            for target_job in "${JOB_ARRAY[@]}"; do
+              target_job=$(echo "$target_job" | xargs)  # trim whitespace
+              if [ "$failed_job" == "$target_job" ]; then
+                echo "Target job '$target_job' failed. Condition met for retry."
+                should_retry=true
+                break 2
+              fi
+            done
+          done <<< "$ALL_FAILED_JOBS"
+          
+          if [ "$should_retry" == "true" ]; then
+            echo "should_retry_filtered=true" >> $GITHUB_OUTPUT
+            echo "Will retry because target job(s) failed"
+          else
+            echo "should_retry_filtered=false" >> $GITHUB_OUTPUT
+            echo "Will not retry because no target jobs failed"
+          fi
+        fi
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+
+    - name: Wait before retry
+      if: steps.retry-check.outputs.should_retry == 'true' && steps.failed-jobs.outputs.should_retry_filtered == 'true'
+      shell: bash
+      run: |
+        echo "Waiting 30 seconds before retrying..."
+        sleep 30
+
+    - name: Retry failed workflow
+      if: steps.retry-check.outputs.should_retry == 'true' && steps.failed-jobs.outputs.should_retry_filtered == 'true'
+      shell: bash
+      run: |
+        WORKFLOW_ID="${{ steps.workflow-info.outputs.workflow_id }}"
+        
+        echo "Retrying workflow run $WORKFLOW_ID"
+        echo "Workflow: ${{ steps.workflow-info.outputs.workflow_name }}"
+        echo "Branch: ${{ steps.workflow-info.outputs.head_branch }}"
+        echo "Failed jobs: ${{ steps.failed-jobs.outputs.failed_jobs }}"
+        
+        # ワークフローを再実行
+        gh run rerun $WORKFLOW_ID --failed
+        
+        echo "✅ Retry initiated for failed jobs"
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+
+    - name: Set retry status
+      id: retry-status
+      shell: bash
+      run: |
+        if [ "${{ steps.retry-check.outputs.should_retry }}" == "true" ] && [ "${{ steps.failed-jobs.outputs.should_retry_filtered }}" == "true" ]; then
+          echo "retry_executed=true" >> $GITHUB_OUTPUT
+          echo "🔄 Auto-retry completed for workflow: ${{ steps.workflow-info.outputs.workflow_name }}"
+          echo "📋 Retried jobs: ${{ steps.failed-jobs.outputs.failed_jobs }}"
+        elif [ "${{ steps.retry-check.outputs.should_retry }}" == "true" ] && [ "${{ steps.failed-jobs.outputs.should_retry_filtered }}" == "false" ]; then
+          echo "retry_executed=false" >> $GITHUB_OUTPUT
+          echo "⏭️ Target jobs did not fail for workflow: ${{ steps.workflow-info.outputs.workflow_name }}"
+        else
+          echo "retry_executed=false" >> $GITHUB_OUTPUT
+          echo "⚠️ Max retries reached for workflow: ${{ steps.workflow-info.outputs.workflow_name }}"
+        fi

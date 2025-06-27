@@ -2,6 +2,7 @@
 
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock
 
 from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
 from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
@@ -10,10 +11,23 @@ from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
 class TestComplexityAnalyzer:
     """Test cases for ComplexityAnalyzer."""
 
+    def _create_test_analyzer(self, max_complexity=None):
+        """Create a test analyzer with mock calculators."""
+        cyclomatic_calc = MagicMock()
+        cognitive_calc = MagicMock()
+        # デフォルトで適切な値を返すようにセットアップ
+        cyclomatic_calc.calculate.return_value = 2
+        cognitive_calc.calculate.return_value = 1
+        return ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc,
+            cognitive_calculator=cognitive_calc,
+            max_complexity=max_complexity,
+        )
+
     def test_analyze_simple_file(self) -> None:
         """Test analyzing a simple Python file."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
         # Act
@@ -47,7 +61,7 @@ class TestComplexityAnalyzer:
     def test_analyze_nonexistent_file(self) -> None:
         """Test analyzing a file that doesn't exist."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
 
         # Act
         result = analyzer.analyze_file("nonexistent.py")
@@ -58,7 +72,7 @@ class TestComplexityAnalyzer:
     def test_analyze_non_python_file(self) -> None:
         """Test analyzing a non-Python file."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
 
         with tempfile.NamedTemporaryFile(suffix=".txt", mode="w", delete=False) as f:
             f.write("This is not Python code")
@@ -73,7 +87,7 @@ class TestComplexityAnalyzer:
     def test_analyze_directory(self) -> None:
         """Test analyzing a directory."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
         fixtures_dir = Path(__file__).parent / "fixtures"
 
         # Act
@@ -88,7 +102,7 @@ class TestComplexityAnalyzer:
     def test_analyze_directory_with_exclusions(self) -> None:
         """Test analyzing a directory with exclusion patterns."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
 
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
@@ -108,7 +122,7 @@ class TestComplexityAnalyzer:
     def test_complexity_calculation(self) -> None:
         """Test that complexity calculations return reasonable values."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
         # Act
@@ -126,7 +140,7 @@ class TestComplexityAnalyzer:
     def test_status_calculation(self) -> None:
         """Test that status is calculated correctly."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
         # Act
@@ -139,7 +153,7 @@ class TestComplexityAnalyzer:
     def test_max_complexity_threshold(self) -> None:
         """Test analyzer with complexity threshold."""
         # Arrange
-        analyzer = ComplexityAnalyzer(max_complexity=1)
+        analyzer = self._create_test_analyzer(max_complexity=1)
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
         # Act
@@ -154,7 +168,7 @@ class TestComplexityAnalyzer:
     def test_analyze_source_with_syntax_error(self) -> None:
         """Test analyzing source code with syntax errors."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
         invalid_code = "def invalid_function(\n    pass"
 
         # Act
@@ -166,7 +180,7 @@ class TestComplexityAnalyzer:
     def test_analyze_source_with_valid_code(self) -> None:
         """Test analyzing valid source code."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
         valid_code = """
 def simple_function():
     return 42
@@ -244,7 +258,7 @@ def function_with_condition(x):
     def test_analyze_file_with_syntax_error(self) -> None:
         """Test analyzing a file with syntax errors."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
 
         with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
             f.write("def broken_function(\n    # Missing closing parenthesis")
@@ -259,7 +273,7 @@ def function_with_condition(x):
     def test_analyzer_with_max_complexity_threshold(self) -> None:
         """Test analyzer with complexity threshold for should_fail."""
         # Arrange
-        analyzer = ComplexityAnalyzer(max_complexity=5)
+        analyzer = self._create_test_analyzer(max_complexity=5)
         high_complexity_func = ComplexityResult(
             name="complex_func",
             cyclomatic_complexity=10,  # Exceeds threshold of 5
@@ -287,7 +301,7 @@ def function_with_condition(x):
     def test_analyzer_should_fail_no_threshold(self) -> None:
         """Test should_fail when no threshold is set."""
         # Arrange
-        analyzer = ComplexityAnalyzer()  # No max_complexity set
+        analyzer = self._create_test_analyzer()  # No max_complexity set
         high_complexity_func = ComplexityResult(
             name="complex_func",
             cyclomatic_complexity=20,
@@ -313,7 +327,7 @@ def function_with_condition(x):
     def test_analyze_empty_python_file(self) -> None:
         """Test analyzing an empty Python file."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
 
         with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
             f.write("")  # Empty file
@@ -333,7 +347,7 @@ def function_with_condition(x):
     def test_analyze_file_with_only_comments(self) -> None:
         """Test analyzing a file with only comments."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
 
         with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
             f.write("# This is just a comment\n# Another comment\n")
@@ -349,7 +363,7 @@ def function_with_condition(x):
     def test_analyze_directory_nonexistent(self) -> None:
         """Test analyzing a directory that doesn't exist."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
 
         # Act
         results = analyzer.analyze_directory("nonexistent_directory")
@@ -360,7 +374,7 @@ def function_with_condition(x):
     def test_analyze_directory_is_file(self) -> None:
         """Test analyzing a directory path that is actually a file."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        analyzer = self._create_test_analyzer()
 
         with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
             f.write("def test(): pass")

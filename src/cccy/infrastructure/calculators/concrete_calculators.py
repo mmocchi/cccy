@@ -7,7 +7,7 @@ from typing import ClassVar, Union
 import mccabe
 from cognitive_complexity.api import get_cognitive_complexity
 
-from cccy.application.interfaces.calculators import ComplexityCalculator
+from cccy.domain.interfaces.calculators import ComplexityCalculator
 
 logger = logging.getLogger(__name__)
 

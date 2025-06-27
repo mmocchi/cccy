@@ -4,7 +4,7 @@ from typing import Callable, Optional, TypeVar
 
 import click
 
-from cccy.infrastructure.logging.config import setup_logging
+from cccy.presentation.factories.service_factory import PresentationLayerServiceFactory
 from cccy.presentation.cli.helpers import (
     create_analyzer_service,
     handle_no_results,
@@ -78,7 +78,8 @@ class CommonProcessor:
         paths: tuple = (),
     ) -> dict:
         """ログ設定と設定読み込みを実行します。"""
-        setup_logging(level=log_level)
+        cli_facade = PresentationLayerServiceFactory.create_cli_facade()
+        cli_facade.setup_logging(level=log_level)
 
         return load_and_merge_config(
             max_complexity=max_complexity,

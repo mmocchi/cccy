@@ -5,25 +5,29 @@ from pathlib import Path
 from typing import Optional, Union
 
 from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
-from cccy.infrastructure.calculators.concrete_calculators import (
-    CognitiveComplexityCalculator,
-    CyclomaticComplexityCalculator,
-)
+from cccy.domain.interfaces.calculators import ComplexityCalculator
 
 
 class ComplexityAnalyzer:
     """複雑度メトリクスのためにPythonソースコードを解析します。"""
 
-    def __init__(self, max_complexity: Optional[int] = None) -> None:
-        """オプションの複雑度闾値でアナライザーを初期化します。
+    def __init__(
+        self,
+        cyclomatic_calculator: ComplexityCalculator,
+        cognitive_calculator: ComplexityCalculator,
+        max_complexity: Optional[int] = None,
+    ) -> None:
+        """複雑度カルキュレーターを注入してアナライザーを初期化します。
 
         Args:
+            cyclomatic_calculator: 循環的複雑度カルキュレーター
+            cognitive_calculator: 認知的複雑度カルキュレーター
             max_complexity: 許可される最大の循環的複雑度
 
         """
         self.max_complexity = max_complexity
-        self.cyclomatic_calculator = CyclomaticComplexityCalculator()
-        self.cognitive_calculator = CognitiveComplexityCalculator()
+        self.cyclomatic_calculator = cyclomatic_calculator
+        self.cognitive_calculator = cognitive_calculator
 
     def analyze_file(
         self, file_path: Union[str, Path]

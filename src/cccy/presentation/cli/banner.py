@@ -1,6 +1,6 @@
 """CLI バナー生成機能。"""
 
-from cccy import get_version
+import importlib.metadata
 
 
 def create_banner() -> str:
@@ -10,7 +10,10 @@ def create_banner() -> str:
         フォーマットされたバナー文字列
 
     """
-    version = get_version()
+    try:
+        version = importlib.metadata.version("cccy")
+    except importlib.metadata.PackageNotFoundError:
+        version = "unknown"
     # バージョンを適切に配置するためのパディングを計算
     max_width = 57  # ボックス内の利用可能な幅
     version_text = f"v{version}"

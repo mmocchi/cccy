@@ -3,8 +3,8 @@
 import importlib.metadata
 
 # Public API exports
-from cccy.application.interfaces.calculators import ComplexityCalculator
 from cccy.application.services.analysis_service import AnalyzerService
+from cccy.domain.interfaces.calculators import ComplexityCalculator
 from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
 from cccy.domain.exceptions.complexity_exceptions import (
     AnalysisError,

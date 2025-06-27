@@ -224,6 +224,43 @@ include = []
 # If not specified, current directory is used
 paths = ["src/"]
 
+[tool.importlinter]
+root_packages = ["cccy"]
+
+[[tool.importlinter.contracts]]
+name = "Clean Architecture: Domain Layer Independence"
+type = "independence"
+modules = ["cccy.domain"]
+
+[[tool.importlinter.contracts]]
+name = "Clean Architecture: Application Layer Dependencies"
+type = "forbidden"
+source_modules = ["cccy.application"]
+forbidden_modules = ["cccy.infrastructure", "cccy.presentation"]
+
+[[tool.importlinter.contracts]]
+name = "Clean Architecture: Infrastructure Dependencies"
+type = "forbidden"
+source_modules = ["cccy.infrastructure"]
+forbidden_modules = ["cccy.application", "cccy.presentation"]
+
+[[tool.importlinter.contracts]]
+name = "Clean Architecture: Presentation Dependencies"
+type = "forbidden"
+source_modules = ["cccy.presentation"]
+forbidden_modules = ["cccy.infrastructure"]
+ignore_imports = [
+    "cccy.presentation.factories.service_factory -> cccy.infrastructure.calculators.concrete_calculators",
+    "cccy.presentation.factories.service_factory -> cccy.infrastructure.config.manager",
+    "cccy.presentation.factories.service_factory -> cccy.infrastructure.formatters.output",
+    "cccy.presentation.factories.service_factory -> cccy.infrastructure.logging.config",
+]
+
+[[tool.importlinter.contracts]]
+name = "Clean Architecture: Shared Layer Independence"
+type = "independence"
+modules = ["cccy.shared"]
+
 [dependency-groups]
 dev = [
     "pytest-cov>=5.0.0",
@@ -233,4 +270,5 @@ dev = [
     "tox>=4.0.0",
     "mypy>=1.16.1",
     "pytest>=8.4.1",
+    "import-linter>=2.3",
 ]

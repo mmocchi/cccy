@@ -5,7 +5,7 @@ from typing import Optional
 
 import click
 
-from cccy.infrastructure.formatters.output import OutputFormatter
+from cccy.presentation.factories.service_factory import PresentationLayerServiceFactory
 from cccy.presentation.cli.banner import create_banner, get_main_help_text
 from cccy.presentation.cli.common import (
     CommonProcessor,
@@ -101,7 +101,8 @@ def check(
 
     # Filter files that exceed thresholds
     if final_max_complexity is not None:
-        failed_results = service.filter_failed_results(
+        cli_facade = PresentationLayerServiceFactory.create_cli_facade()
+        failed_results = cli_facade.filter_failed_results(
             all_results, final_max_complexity, final_max_cognitive
         )
 
@@ -173,10 +174,8 @@ def show_list(
         final_paths, recursive, final_exclude, final_include, verbose
     )
 
-    formatter = OutputFormatter()
-
     # Format and display output
-    format_and_display_output(all_results, output_format, formatter)
+    format_and_display_output(all_results, output_format)
 
 
 @main.command()
@@ -237,7 +236,8 @@ def show_functions(
         final_paths, recursive, final_exclude, final_include, verbose
     )
 
-    formatter = OutputFormatter()
+    cli_facade = PresentationLayerServiceFactory.create_cli_facade()
+    formatter = cli_facade.get_output_formatter()
 
     # Format and display function-level output
     if output_format == "table":
@@ -300,7 +300,8 @@ def show_summary(
         final_paths, recursive, final_exclude, final_include, verbose
     )
 
-    formatter = OutputFormatter()
+    cli_facade = PresentationLayerServiceFactory.create_cli_facade()
+    formatter = cli_facade.get_output_formatter()
 
     # Show only summary
     summary_output = formatter.format_summary(all_results)

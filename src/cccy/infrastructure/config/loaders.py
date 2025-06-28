@@ -2,15 +2,10 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Protocol
+from typing import TYPE_CHECKING
 
-
-class TomlLoader(Protocol):
-    """TOML読み込み機能のプロトコル。"""
-
-    def load(self, fp: object) -> dict[str, object]:
-        """ファイルポインターからTOMLデータを読み込みます。"""
-        ...
+if TYPE_CHECKING:
+    from types import ModuleType
 
 
 class ConfigLoadingStrategy(ABC):
@@ -38,7 +33,7 @@ class TomlLibConfigLoader(ConfigLoadingStrategy):
         try:
             import tomllib  # noqa: PLC0415
 
-            self.toml_loader: TomlLoader = tomllib
+            self.toml_loader: ModuleType = tomllib
         except ImportError as e:
             raise ImportError("tomllib is not available") from e
 
@@ -72,7 +67,7 @@ class TomliConfigLoader(ConfigLoadingStrategy):
         try:
             import tomli  # noqa: PLC0415
 
-            self.toml_loader: TomlLoader = tomli
+            self.toml_loader: ModuleType = tomli
         except ImportError as e:
             raise ImportError("tomli is not available") from e
 

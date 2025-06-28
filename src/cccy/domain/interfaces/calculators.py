@@ -24,3 +24,21 @@ class ComplexityCalculator(ABC):
     @abstractmethod
     def name(self) -> str:
         """この複雑度メトリクスの名前を返します。"""
+
+
+class CyclomaticComplexityCalculator(ComplexityCalculator):
+    """循環的複雑度計算器の抽象ベースクラス。"""
+
+    @property
+    def name(self) -> str:
+        """この複雑度メトリクスの名前を返します。"""
+        return "cyclomatic"
+
+
+class CognitiveComplexityCalculator(ComplexityCalculator):
+    """認知的複雑度計算器の抽象ベースクラス。"""
+
+    @property
+    def name(self) -> str:
+        """この複雑度メトリクスの名前を返します。"""
+        return "cognitive"

@@ -2,6 +2,7 @@
 
 import tempfile
 from pathlib import Path
+from typing import Optional
 from unittest.mock import MagicMock
 
 from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
@@ -11,13 +12,37 @@ from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
 class TestComplexityAnalyzer:
     """Test cases for ComplexityAnalyzer."""
 
-    def _create_test_analyzer(self, max_complexity=None):
+    def _create_test_analyzer(
+        self, max_complexity: Optional[int] = None
+    ) -> ComplexityAnalyzer:
         """Create a test analyzer with mock calculators."""
         cyclomatic_calc = MagicMock()
         cognitive_calc = MagicMock()
-        # デフォルトで適切な値を返すようにセットアップ
-        cyclomatic_calc.calculate.return_value = 2
-        cognitive_calc.calculate.return_value = 1
+
+        # Map function names to complexity values
+        complexity_map = {
+            "simple_function": (1, 0),
+            "function_with_if": (2, 1),
+            "complex_function": (7, 11),
+            "async_function": (1, 0),
+            "some_async_operation_async": (1, 0),
+            "method_one": (1, 0),
+            "method_with_loops": (4, 6),
+        }
+
+        def cyclomatic_side_effect(node: object) -> int:
+            if hasattr(node, "name") and node.name in complexity_map:
+                return complexity_map[node.name][0]
+            return 1
+
+        def cognitive_side_effect(node: object) -> int:
+            if hasattr(node, "name") and node.name in complexity_map:
+                return complexity_map[node.name][1]
+            return 0
+
+        cyclomatic_calc.calculate.side_effect = cyclomatic_side_effect
+        cognitive_calc.calculate.side_effect = cognitive_side_effect
+
         return ComplexityAnalyzer(
             cyclomatic_calculator=cyclomatic_calc,
             cognitive_calculator=cognitive_calc,

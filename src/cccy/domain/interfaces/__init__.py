@@ -1,13 +1,13 @@
 """Domain interfaces."""
 
 from .calculators import (
-    ComplexityCalculator,
     CognitiveComplexityCalculator,
+    ComplexityCalculator,
     CyclomaticComplexityCalculator,
 )
 
 __all__ = [
-    "ComplexityCalculator",
     "CognitiveComplexityCalculator",
+    "ComplexityCalculator",
     "CyclomaticComplexityCalculator",
 ]

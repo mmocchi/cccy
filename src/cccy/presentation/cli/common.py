@@ -4,12 +4,12 @@ from typing import Callable, Optional, TypeVar
 
 import click
 
-from cccy.presentation.factories.service_factory import PresentationLayerServiceFactory
 from cccy.presentation.cli.helpers import (
     create_analyzer_service,
     handle_no_results,
     load_and_merge_config,
 )
+from cccy.presentation.factories.service_factory import PresentationLayerServiceFactory
 from cccy.shared.type_helpers import get_list_value, get_optional_int_value
 
 F = TypeVar("F", bound=Callable)

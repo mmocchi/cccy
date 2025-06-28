@@ -2,6 +2,7 @@
 
 from typing import Optional, Union
 
+from cccy.domain.entities.complexity import FileComplexityResult
 from cccy.domain.interfaces.cli_services import (
     AnalyzerFactoryInterface,
     AnalyzerServiceInterface,
@@ -10,7 +11,6 @@ from cccy.domain.interfaces.cli_services import (
     OutputFormatterInterface,
     ResultFilterInterface,
 )
-from cccy.domain.entities.complexity import FileComplexityResult
 from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
 
 
@@ -26,13 +26,14 @@ class CliFacadeService:
         result_filter: ResultFilterInterface,
     ) -> None:
         """Initialize CLI facade with injected dependencies.
-        
+
         Args:
             logging_service: Service for logging configuration
             config_service: Service for configuration management
             analyzer_factory: Factory for creating analyzer instances
             output_formatter: Service for output formatting
             result_filter: Service for filtering results
+
         """
         self._logging_service = logging_service
         self._config_service = config_service
@@ -41,10 +42,11 @@ class CliFacadeService:
         self._result_filter = result_filter
 
     def setup_logging(self, level: str) -> None:
-        """Setup logging configuration.
-        
+        """Set up logging configuration.
+
         Args:
             level: Logging level to set
+
         """
         self._logging_service.setup_logging(level)
 
@@ -67,6 +69,7 @@ class CliFacadeService:
 
         Returns:
             Merged configuration dictionary
+
         """
         return self._config_service.load_and_merge_config(
             max_complexity=max_complexity,
@@ -86,14 +89,16 @@ class CliFacadeService:
 
         Returns:
             Tuple of (ComplexityAnalyzer, AnalyzerService)
+
         """
         return self._analyzer_factory.create_analyzer_service(max_complexity)
 
     def get_output_formatter(self) -> OutputFormatterInterface:
         """Get output formatter instance.
-        
+
         Returns:
             OutputFormatter interface
+
         """
         return self._output_formatter
 
@@ -104,14 +109,15 @@ class CliFacadeService:
         max_cognitive: Optional[int] = None,
     ) -> list[FileComplexityResult]:
         """Filter results that exceed complexity thresholds.
-        
+
         Args:
             results: Analysis results list
             max_complexity: Maximum allowed cyclomatic complexity
             max_cognitive: Maximum allowed cognitive complexity (optional)
-            
+
         Returns:
             List of results that exceed thresholds
+
         """
         return self._result_filter.filter_failed_results(
             results, max_complexity, max_cognitive

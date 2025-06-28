@@ -12,7 +12,7 @@ class LoggingServiceInterface(ABC):
 
     @abstractmethod
     def setup_logging(self, level: str) -> None:
-        """Setup logging configuration."""
+        """Set up logging configuration."""
 
 
 class ConfigServiceInterface(ABC):

@@ -5,7 +5,6 @@ from typing import Optional
 
 import click
 
-from cccy.presentation.factories.service_factory import PresentationLayerServiceFactory
 from cccy.presentation.cli.banner import create_banner, get_main_help_text
 from cccy.presentation.cli.common import (
     CommonProcessor,
@@ -19,6 +18,7 @@ from cccy.presentation.cli.helpers import (
     format_and_display_output,
     validate_required_config,
 )
+from cccy.presentation.factories.service_factory import PresentationLayerServiceFactory
 
 
 @click.group(

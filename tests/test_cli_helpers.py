@@ -5,7 +5,6 @@ from typing import Any, Union, cast
 import pytest
 
 from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
-from cccy.infrastructure.formatters.output import OutputFormatter
 from cccy.presentation.cli.helpers import (
     format_and_display_output,
     validate_required_config,
@@ -70,10 +69,8 @@ class TestCliHelpers:
             max_cyclomatic=3,
             max_cognitive=2,
         )
-        formatter = OutputFormatter()
-
         # Act
-        format_and_display_output([result], "table", formatter)
+        format_and_display_output([result], "table")
 
         # Assert
         captured = capsys.readouterr()
@@ -102,10 +99,8 @@ class TestCliHelpers:
             max_cyclomatic=3,
             max_cognitive=2,
         )
-        formatter = OutputFormatter()
-
         # Act
-        format_and_display_output([result], "json", formatter)
+        format_and_display_output([result], "json")
 
         # Assert
         captured = capsys.readouterr()
@@ -130,10 +125,8 @@ class TestCliHelpers:
             max_cyclomatic=3,
             max_cognitive=2,
         )
-        formatter = OutputFormatter()
-
         # Act
-        format_and_display_output([result], "csv", formatter)
+        format_and_display_output([result], "csv")
 
         # Assert
         captured = capsys.readouterr()
@@ -158,10 +151,8 @@ class TestCliHelpers:
             max_cyclomatic=3,
             max_cognitive=2,
         )
-        formatter = OutputFormatter()
-
         # Act
-        format_and_display_output([result], "detailed", formatter)
+        format_and_display_output([result], "detailed")
 
         # Assert
         captured = capsys.readouterr()

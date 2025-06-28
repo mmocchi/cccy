@@ -5,10 +5,10 @@ from typing import Optional, Union
 
 import click
 
-from cccy.presentation.factories.service_factory import PresentationLayerServiceFactory
 from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
 from cccy.domain.interfaces.cli_services import AnalyzerServiceInterface
 from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
+from cccy.presentation.factories.service_factory import PresentationLayerServiceFactory
 
 
 def load_and_merge_config(
@@ -206,7 +206,7 @@ def format_and_display_output(
     """
     cli_facade = PresentationLayerServiceFactory.create_cli_facade()
     formatter = cli_facade.get_output_formatter()
-    
+
     # Sort results by file path for consistent output
     results.sort(key=lambda x: x.file_path)
 

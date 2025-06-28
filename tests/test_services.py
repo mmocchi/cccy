@@ -13,10 +13,46 @@ from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
 class TestAnalyzerService:
     """Test cases for AnalysisService."""
 
+    def _create_mock_calculators(self) -> tuple[MagicMock, MagicMock]:
+        """Create mock calculators with realistic return values."""
+        cyclomatic_calc = MagicMock()
+        cognitive_calc = MagicMock()
+
+        # Map function names to complexity values
+        complexity_map = {
+            "simple_function": (1, 0),
+            "function_with_if": (2, 1),
+            "complex_function": (7, 11),
+            "async_function": (1, 0),
+            "some_async_operation_async": (1, 0),
+            "method_one": (1, 0),
+            "method_with_loops": (4, 6),
+        }
+
+        def cyclomatic_side_effect(node: object) -> int:
+            if hasattr(node, "name") and node.name in complexity_map:
+                return complexity_map[node.name][0]
+            return 1
+
+        def cognitive_side_effect(node: object) -> int:
+            if hasattr(node, "name") and node.name in complexity_map:
+                return complexity_map[node.name][1]
+            return 0
+
+        cyclomatic_calc.calculate.side_effect = cyclomatic_side_effect
+        cognitive_calc.calculate.side_effect = cognitive_side_effect
+
+        return cyclomatic_calc, cognitive_calc
+
     def test_init(self) -> None:
         """Test service initialization."""
         # Arrange
-        analyzer = ComplexityAnalyzer(max_complexity=10)
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc,
+            cognitive_calculator=cognitive_calc,
+            max_complexity=10,
+        )
 
         # Act
         service = AnalyzerService(analyzer)
@@ -29,7 +65,10 @@ class TestAnalyzerService:
     def test_analyze_paths_single_file(self) -> None:
         """Test analyzing a single file."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc, cognitive_calculator=cognitive_calc
+        )
         service = AnalyzerService(analyzer)
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
 
@@ -45,7 +84,10 @@ class TestAnalyzerService:
     def test_analyze_paths_directory(self) -> None:
         """Test analyzing a directory."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc, cognitive_calculator=cognitive_calc
+        )
         service = AnalyzerService(analyzer)
         fixtures_dir = Path(__file__).parent / "fixtures"
 
@@ -59,7 +101,10 @@ class TestAnalyzerService:
     def test_analyze_paths_nonexistent(self) -> None:
         """Test analyzing nonexistent path."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc, cognitive_calculator=cognitive_calc
+        )
         service = AnalyzerService(analyzer)
 
         # Act
@@ -71,7 +116,10 @@ class TestAnalyzerService:
     def test_analyze_paths_with_exclude(self) -> None:
         """Test analyzing with exclude patterns."""
         # Arrange
-        analyzer = ComplexityAnalyzer()
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc, cognitive_calculator=cognitive_calc
+        )
         service = AnalyzerService(analyzer)
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -91,7 +139,10 @@ class TestAnalyzerService:
 
     def test_analyze_paths_with_include(self) -> None:
         """Test analyzing with include patterns."""
-        analyzer = ComplexityAnalyzer()
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc, cognitive_calculator=cognitive_calc
+        )
         service = AnalyzerService(analyzer)
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -111,7 +162,10 @@ class TestAnalyzerService:
 
     def test_analyze_paths_verbose(self, capsys: Any) -> None:
         """Test analyzing with verbose output."""
-        analyzer = ComplexityAnalyzer()
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc, cognitive_calculator=cognitive_calc
+        )
         service = AnalyzerService(analyzer)
 
         fixture_path = Path(__file__).parent / "fixtures" / "simple.py"
@@ -127,7 +181,10 @@ class TestAnalyzerService:
         """Test handling permission errors."""
         mock_exists.return_value = True
 
-        analyzer = ComplexityAnalyzer()
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc, cognitive_calculator=cognitive_calc
+        )
         service = AnalyzerService(analyzer)
 
         # Mock a path that raises PermissionError
@@ -145,7 +202,10 @@ class TestAnalyzerService:
         """Test handling general errors."""
         mock_exists.return_value = True
 
-        analyzer = ComplexityAnalyzer()
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc, cognitive_calculator=cognitive_calc
+        )
         service = AnalyzerService(analyzer)
 
         # Mock a path that raises general exception
@@ -191,7 +251,10 @@ class TestAnalyzerService:
             max_cyclomatic=12,
             max_cognitive=8,
         )
-        analyzer = ComplexityAnalyzer()
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc, cognitive_calculator=cognitive_calc
+        )
         service = AnalyzerService(analyzer)
         all_results = [low_result, high_result]
 
@@ -227,7 +290,10 @@ class TestAnalyzerService:
             max_cyclomatic=3,
             max_cognitive=8,
         )
-        analyzer = ComplexityAnalyzer()
+        cyclomatic_calc, cognitive_calc = self._create_mock_calculators()
+        analyzer = ComplexityAnalyzer(
+            cyclomatic_calculator=cyclomatic_calc, cognitive_calculator=cognitive_calc
+        )
         service = AnalyzerService(analyzer)
 
         # Act

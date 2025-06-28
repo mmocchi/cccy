@@ -1,33 +1,13 @@
 """Configuration management for cccy."""
 
 from pathlib import Path
-from typing import Optional, Protocol, Union
+from typing import Optional, Union
 
 from pydantic import ValidationError
 
-from cccy.models import CccySettings
-
-
-class TomlLoader(Protocol):
-    """TOML読み込み機能のプロトコル。"""
-
-    def load(self, fp: object) -> dict[str, object]:
-        """ファイルポインターからTOMLデータを読み込みます。"""
-        ...
-
-
-try:
-    import tomllib
-
-    toml_loader: Optional[TomlLoader] = tomllib
-except ImportError:
-    # Python < 3.11
-    try:
-        import tomli
-
-        toml_loader = tomli  # type: ignore[assignment]
-    except ImportError:
-        toml_loader = None
+from cccy.domain.entities.complexity import CccySettings
+from cccy.infrastructure.config.loaders import ConfigLoaderFactory
+from cccy.infrastructure.config.merger import ConfigMerger, ConfigValidator
 
 
 class CccyConfig:
@@ -57,25 +37,11 @@ class CccyConfig:
 
     def _load_config(self) -> dict[str, object]:
         """pyproject.tomlファイルから設定を読み込みます。"""
-        if not self.config_path or not self.config_path.exists():
+        if not self.config_path:
             return {}
 
-        if toml_loader is None:
-            # No TOML parser available, return empty config
-            return {}
-
-        try:
-            with self.config_path.open("rb") as f:
-                config_data = toml_loader.load(f)
-                tool_config = config_data.get("tool", {})
-                if isinstance(tool_config, dict):
-                    cccy_config = tool_config.get("cccy", {})
-                    if isinstance(cccy_config, dict):
-                        return cccy_config
-                return {}
-        except Exception:
-            # If parsing fails, use empty config
-            return {}
+        loader = ConfigLoaderFactory.create_loader()
+        return loader.load_config(self.config_path)
 
     def _get_settings(self) -> CccySettings:
         """Pydantic設定インスタンスを取得します。"""
@@ -122,10 +88,36 @@ class CccyConfig:
     ) -> dict[str, Union[str, int, list[str], None]]:
         """設定をCLIオプションとマージし、CLIが優先されます。"""
         settings = self._get_settings()
-        return {
-            "max_complexity": max_complexity or settings.max_complexity,
-            "max_cognitive": max_cognitive or settings.max_cognitive,
-            "exclude": list(exclude) if exclude else settings.exclude,
-            "include": list(include) if include else settings.include,
-            "paths": list(paths) if paths else settings.paths,
-        }
+        merger = ConfigMerger(settings)
+        merged_config = merger.merge_with_cli_options(
+            max_complexity=max_complexity,
+            max_cognitive=max_cognitive,
+            exclude=exclude,
+            include=include,
+            paths=paths,
+        )
+
+        # 設定値の検証
+        max_complexity_val = merged_config["max_complexity"]
+        max_cognitive_val = merged_config["max_cognitive"]
+        paths_val = merged_config["paths"]
+
+        max_complexity_typed = (
+            max_complexity_val
+            if isinstance(max_complexity_val, (int, type(None)))
+            else None
+        )
+        max_cognitive_typed = (
+            max_cognitive_val
+            if isinstance(max_cognitive_val, (int, type(None)))
+            else None
+        )
+
+        ConfigValidator.validate_complexity_thresholds(
+            max_complexity_typed, max_cognitive_typed
+        )
+
+        if paths_val and isinstance(paths_val, list):
+            ConfigValidator.validate_paths(paths_val)
+
+        return merged_config

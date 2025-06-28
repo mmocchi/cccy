@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from cccy.config import CccyConfig
+from cccy.infrastructure.config.manager import CccyConfig
 
 
 class TestCccyConfig:

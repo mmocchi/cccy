@@ -44,13 +44,19 @@ tasks:
       - uv run cccy check --max-complexity 8 --max-cognitive 8 src/
       - uv run cccy check --max-complexity 6 --max-cognitive 6 tests/ --exclude "tests/fixtures/*"
   
+  lint-imports:
+    desc: Check import dependencies with import-linter
+    cmds:
+      - uv run lint-imports
+
   check:
-    desc: Run all checks (complexity, linting, formatting)
+    desc: Run all checks (complexity, linting, formatting, imports)
     cmds:
       - task: lint
       - task: format-check
       - task: test
       - task: complexity-check
+      - task: lint-imports
   
   build:
     desc: Build package

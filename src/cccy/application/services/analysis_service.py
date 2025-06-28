@@ -6,13 +6,14 @@ from typing import Optional
 
 import click
 
-from cccy.analyzer import ComplexityAnalyzer
-from cccy.models import FileComplexityResult
+from cccy.domain.entities.complexity import FileComplexityResult
+from cccy.domain.interfaces.cli_services import AnalyzerServiceInterface
+from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
 
 logger = logging.getLogger(__name__)
 
 
-class AnalyzerService:
+class AnalyzerService(AnalyzerServiceInterface):
     """複雑度解析操作を処理するサービス。"""
 
     def __init__(self, analyzer: ComplexityAnalyzer) -> None:

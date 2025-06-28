@@ -2,15 +2,10 @@
 
 import importlib.metadata
 
-from cccy.analyzer import ComplexityAnalyzer
-from cccy.complexity_calculators import (
-    CognitiveComplexityCalculator,
-    ComplexityCalculator,
-    ComplexityCalculatorFactory,
-    CyclomaticComplexityCalculator,
-)
-from cccy.config import CccyConfig
-from cccy.exceptions import (
+# Public API exports
+from cccy.application.services.analysis_service import AnalyzerService
+from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
+from cccy.domain.exceptions.complexity_exceptions import (
     AnalysisError,
     CccyError,
     ComplexityCalculationError,
@@ -18,9 +13,15 @@ from cccy.exceptions import (
     DirectoryAnalysisError,
     FileAnalysisError,
 )
-from cccy.formatters import OutputFormatter
-from cccy.models import ComplexityResult, FileComplexityResult
-from cccy.services import AnalyzerService
+from cccy.domain.interfaces.calculators import ComplexityCalculator
+from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
+from cccy.infrastructure.calculators.concrete_calculators import (
+    CognitiveComplexityCalculator,
+    ComplexityCalculatorFactory,
+    CyclomaticComplexityCalculator,
+)
+from cccy.infrastructure.config.manager import CccyConfig
+from cccy.infrastructure.formatters.output import OutputFormatter
 
 
 def get_version() -> str:

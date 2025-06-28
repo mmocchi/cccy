@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from cccy.formatters import OutputFormatter
-from cccy.models import ComplexityResult, FileComplexityResult
+from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
+from cccy.infrastructure.formatters.output import OutputFormatter
 
 
 @pytest.fixture

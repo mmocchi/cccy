@@ -6,7 +6,7 @@ from io import StringIO
 
 from tabulate import tabulate
 
-from cccy.models import FileComplexityResult
+from cccy.domain.entities.complexity import FileComplexityResult
 
 
 class OutputFormatter:

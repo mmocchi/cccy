@@ -5,11 +5,10 @@ from typing import Optional, Union
 
 import click
 
-from cccy.analyzer import ComplexityAnalyzer
-from cccy.config import CccyConfig
-from cccy.formatters import OutputFormatter
-from cccy.models import ComplexityResult, FileComplexityResult
-from cccy.services import AnalyzerService
+from cccy.domain.entities.complexity import ComplexityResult, FileComplexityResult
+from cccy.domain.interfaces.cli_services import AnalyzerServiceInterface
+from cccy.domain.services.complexity_analyzer import ComplexityAnalyzer
+from cccy.presentation.factories.service_factory import PresentationLayerServiceFactory
 
 
 def load_and_merge_config(
@@ -32,31 +31,30 @@ def load_and_merge_config(
         マージされた設定辞書
 
     """
-    config = CccyConfig()
-    return config.merge_with_cli_options(
+    cli_facade = PresentationLayerServiceFactory.create_cli_facade()
+    return cli_facade.load_and_merge_config(
         max_complexity=max_complexity,
         max_cognitive=max_cognitive,
-        exclude=list(exclude) if exclude else None,
-        include=list(include) if include else None,
-        paths=list(paths) if paths else None,
+        exclude=exclude,
+        include=include,
+        paths=paths,
     )
 
 
 def create_analyzer_service(
     max_complexity: Optional[int] = None,
-) -> tuple[ComplexityAnalyzer, AnalyzerService]:
+) -> tuple[ComplexityAnalyzer, AnalyzerServiceInterface]:
     """アナライザーとサービスインスタンスを作成します。
 
     Args:
         max_complexity: アナライザーの最大複雑度闾値
 
     Returns:
-        (ComplexityAnalyzer, AnalyzerService)のタプル
+        (ComplexityAnalyzer, AnalyzerServiceInterface)のタプル
 
     """
-    analyzer = ComplexityAnalyzer(max_complexity=max_complexity)
-    service = AnalyzerService(analyzer)
-    return analyzer, service
+    cli_facade = PresentationLayerServiceFactory.create_cli_facade()
+    return cli_facade.create_analyzer_service(max_complexity=max_complexity)
 
 
 def handle_no_results() -> None:
@@ -195,19 +193,20 @@ def validate_required_config(
 def format_and_display_output(
     results: list,
     output_format: str,
-    formatter: OutputFormatter,
 ) -> None:
     """指定されたフォーマットに基づいて出力をフォーマットし、表示します。
 
     Args:
         results: 解析結果のリスト
         output_format: 希望する出力フォーマット
-        formatter: OutputFormatterインスタンス
 
     Raises:
         SystemExit: 不明なフォーマットが指定された場合
 
     """
+    cli_facade = PresentationLayerServiceFactory.create_cli_facade()
+    formatter = cli_facade.get_output_formatter()
+
     # Sort results by file path for consistent output
     results.sort(key=lambda x: x.file_path)
 

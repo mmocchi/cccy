@@ -42,7 +42,7 @@ tasks:
     desc: "Check complexity thresholds"
     cmds:
       - uv run cccy check --max-complexity 8 --max-cognitive 8 src/
-      - uv run cccy check --max-complexity 6 --max-cognitive 6 tests/ --exclude "tests/fixtures/*"
+      - uv run cccy check --max-complexity 6 --max-cognitive 6 tests/ --exclude "tests/application/services/fixtures/*" --exclude "tests/domain/services/fixtures/*" --exclude "tests/presentation/cli/fixtures/*"
   
   lint-imports:
     desc: Check import dependencies with import-linter

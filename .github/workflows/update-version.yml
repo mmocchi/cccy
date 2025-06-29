@@ -84,6 +84,10 @@ jobs:
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       # バージョン更新のPRを自動作成
+      # 注意: このステップを動作させるには、以下のいずれかが必要です：
+      # 1. リポジトリ設定で "Allow GitHub Actions to create and approve pull requests" を有効化
+      #    Settings → Actions → General → Workflow permissions
+      # 2. または、PAT (Personal Access Token) を使用: token: ${{ secrets.PAT }}
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:

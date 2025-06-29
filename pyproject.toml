@@ -1,38 +1,22 @@
 [build-system]
-requires = ["hatchling"]
+requires = [ "hatchling",]
 build-backend = "hatchling.build"
 
 [project]
 name = "cccy"
-version = "0.2.0"
+version = "0.2.1"
 description = "Python complexity measurement tool"
 readme = "README.md"
 license = "MIT"
-authors = [
-    { name = "mmocchi", email = "akihiro.matsumoto.exe@gmail.com" },
-]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Software Development :: Quality Assurance",
-]
+classifiers = [ "Development Status :: 4 - Beta", "Intended Audience :: Developers", "License :: OSI Approved :: MIT License", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Topic :: Software Development :: Quality Assurance",]
 requires-python = ">=3.9"
-dependencies = [
-    "mccabe>=0.7.0",
-    "cognitive-complexity>=1.3.0",
-    "click>=8.0.0",
-    "tabulate>=0.9.0",
-    "tomli>=1.2.0;python_version<'3.11'",
-    "pydantic>=2.0.0",
-    "pydantic-settings>=2.0.0",
-]
+dependencies = [ "mccabe>=0.7.0", "cognitive-complexity>=1.3.0", "click>=8.0.0", "tabulate>=0.9.0", "tomli>=1.2.0;python_version<'3.11'", "pydantic>=2.0.0", "pydantic-settings>=2.0.0",]
+[[project.authors]]
+name = "mmocchi"
+email = "akihiro.matsumoto.exe@gmail.com"
+
+[dependency-groups]
+dev = [ "pytest-cov>=5.0.0", "ruff>=0.12.0", "types-tabulate>=0.9.0.20241207", "pre-commit>=3.5.0", "tox>=4.0.0", "mypy>=1.16.1", "pytest>=8.4.1", "import-linter>=2.3",]
 
 [project.scripts]
 cccy = "cccy.presentation.cli.main:main"
@@ -42,97 +26,9 @@ Homepage = "https://github.com/mmocchi/cccy"
 Repository = "https://github.com/mmocchi/cccy"
 Issues = "https://github.com/mmocchi/cccy/issues"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/cccy"]
-
-[tool.hatch.build.targets.sdist]
-include = [
-    "/src",
-    "/tests",
-    "/README.md",
-    "/LICENSE",
-]
-
 [tool.ruff]
 target-version = "py39"
 line-length = 88
-
-[tool.ruff.lint]
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
-    # Phase 1: Security and Code Quality
-    "S",   # bandit (security)
-    "A",   # flake8-builtins (builtin shadowing)
-    "RET", # flake8-return (return optimization)
-    "SIM", # flake8-simplify (code simplification)
-    "ARG", # flake8-unused-arguments (unused arguments)
-    "PTH", # flake8-use-pathlib (pathlib usage)
-    "RUF", # Ruff-specific rules
-    # Phase 2: Type Hints and Documentation
-    "ANN", # flake8-annotations (type annotations)
-    "TCH", # flake8-type-checking (TYPE_CHECKING blocks)
-    "D",   # pydocstyle (docstring style)
-    # Phase 3: Advanced Static Analysis
-    "ERA", # eradicate (commented-out code)
-    "TRY", # tryceratops (exception handling best practices)
-    "PERF", # perflint (performance improvements)
-    "PL",  # pylint (advanced static analysis)
-    "PT",  # flake8-pytest-style (pytest best practices)
-]
-ignore = [
-    "E501",  # line too long, handled by formatter
-    # Temporary ignores for Phase 1 rollout (will be addressed)
-    "S101",  # assert usage (common in tests)
-    "S603",  # subprocess without shell=True check
-    "S607",  # starting a process with a partial executable path
-    # Phase 2 temporary ignores
-    "ANN401", # Any usage (will be gradually addressed)
-    "D100",   # missing docstring in public module
-    "D104",   # missing docstring in public package
-    "D107",   # missing docstring in __init__
-    "D203",   # blank line before class docstring (conflicts with D211)
-    "D213",   # multi-line summary second line (conflicts with D212)
-    # CLI-specific docstring ignores (Click command help text format)
-    "D205",   # blank line required between summary and description
-    "D301",   # use r""" for backslashes (conflicts with Click format)
-    "D400",   # first line should end with period (conflicts with Click)
-    "D415",   # first line should end with punctuation (conflicts with Click)
-    # Phase 3 temporary ignores (gradual adoption)
-    "PLR0913", # too many arguments (common in CLI commands)
-    "PLR0912", # too many branches
-    "PLR0915", # too many statements
-    "PLR2004", # magic value comparison
-    "PLC0414", # import alias does not rename original package
-    "TRY003",  # avoid specifying long messages outside exception class
-    "TRY300",  # consider moving to else block
-    "TRY301",  # abstract raise to inner function
-    "TRY400",  # use logging.exception instead of logging.error
-    "PERF401", # use list comprehension (will be addressed later)
-    "PT011",   # pytest.raises is too broad
-]
-
-# Test-specific rule overrides
-[tool.ruff.lint.per-file-ignores]
-"tests/**" = [
-    "D401",    # first line should be in imperative mood
-    "PLR2004", # magic value comparison
-]
-
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-skip-magic-trailing-comma = false
-line-ending = "auto"
-
-[tool.ruff.lint.isort]
-known-first-party = ["cccy"]
 
 [tool.mypy]
 python_version = "3.9"
@@ -148,14 +44,8 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
-
 [[tool.mypy.overrides]]
-module = [
-    "mccabe.*",
-    "cognitive_complexity.*",
-    "tomli.*",
-    "tomllib.*",
-]
+module = [ "mccabe.*", "cognitive_complexity.*", "tomli.*", "tomllib.*",]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
@@ -169,106 +59,76 @@ disallow_incomplete_defs = false
 check_untyped_defs = false
 disallow_untyped_decorators = false
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-addopts = [
-    "--strict-markers",
-    "--strict-config",
-    "--cov=cccy",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-report=xml",
-]
-
-[tool.coverage.run]
-source = ["src/cccy"]
-branch = true
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
-]
-
 [tool.cccy]
-# Maximum complexity thresholds
 max-complexity = 10
 max-cognitive = 7
-
-# File patterns to exclude (default: empty)
-exclude = [
-    "*/migrations/*",
-    "*/venv/*",
-    "*/.venv/*",
-    "*/node_modules/*",
-    "*/__pycache__/*",
-    "*.egg-info/*",
-]
-
-# File patterns to include (default: all .py files)
-# If specified, only files matching these patterns will be analyzed
+exclude = [ "*/migrations/*", "*/venv/*", "*/.venv/*", "*/node_modules/*", "*/__pycache__/*", "*.egg-info/*",]
 include = []
-
-# Default paths to analyze when no paths are provided
-# If not specified, current directory is used
-paths = ["src/"]
+paths = [ "src/",]
 
 [tool.importlinter]
-root_packages = ["cccy"]
-
+root_packages = [ "cccy",]
 [[tool.importlinter.contracts]]
 name = "Clean Architecture: Domain Layer Independence"
 type = "independence"
-modules = ["cccy.domain"]
+modules = [ "cccy.domain",]
 
 [[tool.importlinter.contracts]]
 name = "Clean Architecture: Application Layer Dependencies"
 type = "forbidden"
-source_modules = ["cccy.application"]
-forbidden_modules = ["cccy.infrastructure", "cccy.presentation"]
+source_modules = [ "cccy.application",]
+forbidden_modules = [ "cccy.infrastructure", "cccy.presentation",]
 
 [[tool.importlinter.contracts]]
 name = "Clean Architecture: Infrastructure Dependencies"
 type = "forbidden"
-source_modules = ["cccy.infrastructure"]
-forbidden_modules = ["cccy.application", "cccy.presentation"]
+source_modules = [ "cccy.infrastructure",]
+forbidden_modules = [ "cccy.application", "cccy.presentation",]
 
 [[tool.importlinter.contracts]]
 name = "Clean Architecture: Presentation Dependencies"
 type = "forbidden"
-source_modules = ["cccy.presentation"]
-forbidden_modules = ["cccy.infrastructure"]
-ignore_imports = [
-    "cccy.presentation.factories.service_factory -> cccy.infrastructure.calculators.concrete_calculators",
-    "cccy.presentation.factories.service_factory -> cccy.infrastructure.config.manager",
-    "cccy.presentation.factories.service_factory -> cccy.infrastructure.formatters.output",
-    "cccy.presentation.factories.service_factory -> cccy.infrastructure.logging.config",
-]
+source_modules = [ "cccy.presentation",]
+forbidden_modules = [ "cccy.infrastructure",]
+ignore_imports = [ "cccy.presentation.factories.service_factory -> cccy.infrastructure.calculators.concrete_calculators", "cccy.presentation.factories.service_factory -> cccy.infrastructure.config.manager", "cccy.presentation.factories.service_factory -> cccy.infrastructure.formatters.output", "cccy.presentation.factories.service_factory -> cccy.infrastructure.logging.config",]
 
 [[tool.importlinter.contracts]]
 name = "Clean Architecture: Shared Layer Independence"
 type = "independence"
-modules = ["cccy.shared"]
+modules = [ "cccy.shared",]
 
-[dependency-groups]
-dev = [
-    "pytest-cov>=5.0.0",
-    "ruff>=0.12.0",
-    "types-tabulate>=0.9.0.20241207",
-    "pre-commit>=3.5.0",
-    "tox>=4.0.0",
-    "mypy>=1.16.1",
-    "pytest>=8.4.1",
-    "import-linter>=2.3",
-]
+[tool.ruff.lint]
+select = [ "E", "W", "F", "I", "B", "C4", "UP", "S", "A", "RET", "SIM", "ARG", "PTH", "RUF", "ANN", "TCH", "D", "ERA", "TRY", "PERF", "PL", "PT",]
+ignore = [ "E501", "S101", "S603", "S607", "ANN401", "D100", "D104", "D107", "D203", "D213", "D205", "D301", "D400", "D415", "PLR0913", "PLR0912", "PLR0915", "PLR2004", "PLC0414", "TRY003", "TRY300", "TRY301", "TRY400", "PERF401", "PT011",]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.pytest.ini_options]
+testpaths = [ "tests",]
+python_files = [ "test_*.py",]
+python_classes = [ "Test*",]
+python_functions = [ "test_*",]
+addopts = [ "--strict-markers", "--strict-config", "--cov=cccy", "--cov-report=term-missing", "--cov-report=html", "--cov-report=xml",]
+
+[tool.coverage.run]
+source = [ "src/cccy",]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [ "pragma: no cover", "def __repr__", "if self.debug:", "if settings.DEBUG", "raise AssertionError", "raise NotImplementedError", "if 0:", "if __name__ == .__main__.:", "class .*\\bProtocol\\):", "@(abc\\.)?abstractmethod",]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [ "D401", "PLR2004",]
+
+[tool.ruff.lint.isort]
+known-first-party = [ "cccy",]
+
+[tool.hatch.build.targets.wheel]
+packages = [ "src/cccy",]
+
+[tool.hatch.build.targets.sdist]
+include = [ "/src", "/tests", "/README.md", "/LICENSE",]

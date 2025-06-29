@@ -119,3 +119,15 @@ tasks:
     desc: Run tox complexity environment
     cmds:
       - uv run tox -e complexity
+
+  docs:serve:
+    desc: Start MkDocs development server
+    cmds:
+      - pip install -r docs/requirements.txt
+      - mkdocs serve
+
+  docs:build:
+    desc: Build MkDocs documentation
+    cmds:
+      - pip install -r docs/requirements.txt
+      - mkdocs build

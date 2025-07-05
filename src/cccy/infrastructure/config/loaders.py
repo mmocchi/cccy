@@ -49,7 +49,7 @@ class TomlLibConfigLoader(ConfigLoadingStrategy):
         except Exception:
             return {}
 
-    def _extract_cccy_config(self, config_data: dict) -> dict[str, object]:
+    def _extract_cccy_config(self, config_data: dict[str, object]) -> dict[str, object]:
         """設定データからcccy設定を抽出します。"""
         tool_config = config_data.get("tool", {})
         if isinstance(tool_config, dict):
@@ -83,7 +83,7 @@ class TomliConfigLoader(ConfigLoadingStrategy):
         except Exception:
             return {}
 
-    def _extract_cccy_config(self, config_data: dict) -> dict[str, object]:
+    def _extract_cccy_config(self, config_data: dict[str, object]) -> dict[str, object]:
         """設定データからcccy設定を抽出します。"""
         tool_config = config_data.get("tool", {})
         if isinstance(tool_config, dict):

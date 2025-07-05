@@ -43,12 +43,12 @@ def main(ctx: click.Context) -> None:  # noqa: D103
 @analysis_options
 @common_options
 def check(
-    paths: tuple,
+    paths: tuple[str, ...],
     max_complexity: Optional[int],
     max_cognitive: Optional[int],
     recursive: bool,
-    exclude: tuple,
-    include: tuple,
+    exclude: tuple[str, ...],
+    include: tuple[str, ...],
     verbose: bool,
     log_level: str,
 ) -> None:
@@ -124,11 +124,11 @@ def check(
 @format_options
 @common_options
 def show_list(
-    paths: tuple,
+    paths: tuple[str, ...],
     output_format: str,
     recursive: bool,
-    exclude: tuple,
-    include: tuple,
+    exclude: tuple[str, ...],
+    include: tuple[str, ...],
     verbose: bool,
     log_level: str,
 ) -> None:
@@ -188,11 +188,11 @@ def show_list(
 )
 @common_options
 def show_functions(
-    paths: tuple,
+    paths: tuple[str, ...],
     output_format: str,
     recursive: bool,
-    exclude: tuple,
-    include: tuple,
+    exclude: tuple[str, ...],
+    include: tuple[str, ...],
     verbose: bool,
     log_level: str,
 ) -> None:
@@ -253,10 +253,10 @@ def show_functions(
 @main.command()
 @common_options
 def show_summary(
-    paths: tuple,
+    paths: tuple[str, ...],
     recursive: bool,
-    exclude: tuple,
-    include: tuple,
+    exclude: tuple[str, ...],
+    include: tuple[str, ...],
     verbose: bool,
     log_level: str,
 ) -> None:

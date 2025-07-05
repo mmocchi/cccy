@@ -26,7 +26,7 @@ def create_banner() -> str:
 │  ██▀ ██▀ ██▀ █▄█                                        │
 │  ██▄ ██▄ ██▄  █     {version_text}{" " * padding}    │
 │                                                         │
-│  Python Code Complexity Analyzer                        │
+│  Cycromatic and Cognitive Complexity                    │
 │                                                         │
 └─────────────────────────────────────────────────────────┘"""
 

@@ -417,5 +417,5 @@ class TestCLI:
         result = runner.invoke(main, [])
 
         assert result.exit_code == 0
-        assert "Python Code Complexity Analyzer" in result.output
+        assert "Cycromatic and Cognitive Complexity" in result.output
         assert "Commands:" in result.output

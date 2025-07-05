@@ -1,6 +1,6 @@
 """CLI共通処理とオプション定義。"""
 
-from typing import Callable, Optional, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 
 import click
 
@@ -12,7 +12,7 @@ from cccy.presentation.cli.helpers import (
 from cccy.presentation.factories.service_factory import PresentationLayerServiceFactory
 from cccy.shared.type_helpers import get_list_value, get_optional_int_value
 
-F = TypeVar("F", bound=Callable)
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 def common_options(f: F) -> F:
@@ -73,10 +73,10 @@ class CommonProcessor:
         log_level: str,
         max_complexity: Optional[int] = None,
         max_cognitive: Optional[int] = None,
-        exclude: tuple = (),
-        include: tuple = (),
-        paths: tuple = (),
-    ) -> dict:
+        exclude: tuple[str, ...] = (),
+        include: tuple[str, ...] = (),
+        paths: tuple[str, ...] = (),
+    ) -> dict[str, Any]:
         """ログ設定と設定読み込みを実行します。"""
         cli_facade = PresentationLayerServiceFactory.create_cli_facade()
         cli_facade.setup_logging(level=log_level)
@@ -90,7 +90,9 @@ class CommonProcessor:
         )
 
     @staticmethod
-    def extract_final_config(merged_config: dict) -> tuple:
+    def extract_final_config(
+        merged_config: dict[str, Any],
+    ) -> tuple[Optional[int], Optional[int], list[str], list[str], list[str]]:
         """マージされた設定から最終的なパラメータを抽出します。"""
         final_max_complexity = get_optional_int_value(merged_config["max_complexity"])
         final_max_cognitive = get_optional_int_value(merged_config["max_cognitive"])
@@ -108,13 +110,13 @@ class CommonProcessor:
 
     @staticmethod
     def analyze_and_get_results(
-        final_paths: list,
+        final_paths: list[str],
         recursive: bool,
-        final_exclude: list,
-        final_include: list,
+        final_exclude: list[str],
+        final_include: list[str],
         verbose: bool,
         max_complexity: Optional[int] = None,
-    ) -> tuple:
+    ) -> tuple[list[Any], Any]:
         """解析を実行して結果を取得します。"""
         analyzer, service = create_analyzer_service(max_complexity=max_complexity)
 

@@ -1,6 +1,6 @@
 """Pydantic models for data structures and configuration."""
 
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -42,7 +42,7 @@ class FileComplexityResult(BaseModel):
 
     model_config = ConfigDict(validate_assignment=True)
 
-    def get_status(self, thresholds: Optional[dict] = None) -> str:
+    def get_status(self, thresholds: Optional[dict[str, dict[str, int]]] = None) -> str:
         """複雑度闾値に基づいてステータスを返します。
 
         Args:
@@ -105,7 +105,7 @@ class CccySettings(BaseSettings):
     paths: list[str] = Field(
         default_factory=lambda: ["."], description="Default paths to analyze"
     )
-    status_thresholds: dict = Field(
+    status_thresholds: dict[str, dict[str, int]] = Field(
         default_factory=lambda: {
             "medium": {"cyclomatic": 5, "cognitive": 4},
             "high": {"cyclomatic": 10, "cognitive": 7},
@@ -119,7 +119,9 @@ class CccySettings(BaseSettings):
 
     @field_validator("status_thresholds")
     @classmethod
-    def validate_status_thresholds(cls, v: dict) -> dict[str, dict[str, int]]:
+    def validate_status_thresholds(
+        cls, v: dict[str, dict[str, int]]
+    ) -> dict[str, dict[str, int]]:
         """ステータス闾値を検証し、デフォルトとマージします。"""
         defaults = cls._get_default_thresholds()
         result = cls._merge_thresholds_with_defaults(defaults, v)
@@ -136,7 +138,7 @@ class CccySettings(BaseSettings):
 
     @classmethod
     def _merge_thresholds_with_defaults(
-        cls, defaults: dict[str, dict[str, int]], user_input: dict
+        cls, defaults: dict[str, dict[str, int]], user_input: dict[str, dict[str, int]]
     ) -> dict[str, dict[str, int]]:
         """ユーザー入力をデフォルト闾値とマージします。"""
         result = defaults.copy()
@@ -147,7 +149,10 @@ class CccySettings(BaseSettings):
 
     @classmethod
     def _update_level_thresholds(
-        cls, result: dict[str, dict[str, int]], user_input: dict, level: str
+        cls,
+        result: dict[str, dict[str, int]],
+        user_input: dict[str, dict[str, int]],
+        level: str,
     ) -> None:
         """特定のレベルの闾値を更新します。"""
         for metric in ["cyclomatic", "cognitive"]:
@@ -171,7 +176,7 @@ class CccySettings(BaseSettings):
                 raise ValueError(f"High {metric} threshold must be >= medium threshold")
 
     @classmethod
-    def from_toml_config(cls, config_data: dict) -> "CccySettings":
+    def from_toml_config(cls, config_data: dict[str, Any]) -> "CccySettings":
         """TOML設定データから設定を作成します。
 
         Args:
@@ -182,7 +187,7 @@ class CccySettings(BaseSettings):
 
         """
         # Convert kebab-case keys to snake_case for Pydantic
-        converted_data = {}
+        converted_data: dict[str, Any] = {}
         for key, value in config_data.items():
             snake_key = key.replace("-", "_")
             converted_data[snake_key] = value

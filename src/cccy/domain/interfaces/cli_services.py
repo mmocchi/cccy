@@ -46,7 +46,7 @@ class AnalyzerServiceInterface(ABC):
     @abstractmethod
     def analyze_paths(
         self,
-        paths: tuple,
+        paths: tuple[str, ...],
         recursive: bool = True,
         exclude_patterns: Optional[list[str]] = None,
         include_patterns: Optional[list[str]] = None,

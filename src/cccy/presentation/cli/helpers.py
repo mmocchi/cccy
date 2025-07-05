@@ -64,7 +64,7 @@ def handle_no_results() -> None:
 
 
 def display_failed_results(
-    failed_results: list,
+    failed_results: list[FileComplexityResult],
     total_results_count: int,
     max_complexity: int,
     max_cognitive: Optional[int] = None,
@@ -191,7 +191,7 @@ def validate_required_config(
 
 
 def format_and_display_output(
-    results: list,
+    results: list[FileComplexityResult],
     output_format: str,
 ) -> None:
     """指定されたフォーマットに基づいて出力をフォーマットし、表示します。
